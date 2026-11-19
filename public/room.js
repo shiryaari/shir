@@ -152,6 +152,12 @@
       if (!entered) { $("coverText").textContent = "הסשן הזה הסתיים"; $("count").hidden = true; $("enter").hidden = true; }
       else stage.innerHTML = `<div class="cover"><div style="font-size:1.6rem">${C.endedMessage}</div></div>`;
       addMsg(C.hostName, C.endedMessage, "host");
+      if (entered && !qDone && C.questionnaire.endReminder) {
+        $("cta").style.display = "block";
+        $("ctaText").textContent = fill(C.questionnaire.endReminder);
+        $("ctaBtn").textContent = C.questionnaire.buttonText;
+        addMsg(C.hostName, fill(C.questionnaire.endReminder), "host");
+      }
     }
   }, 500);
 
