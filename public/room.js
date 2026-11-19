@@ -62,7 +62,9 @@
   const qUrl = () => C.questionnaire.url
     .replaceAll("{token}", encodeURIComponent(token))
     .replaceAll("{name}", encodeURIComponent(S.name))
-    .replaceAll("{email}", encodeURIComponent(S.email));
+    .replaceAll("{email}", encodeURIComponent(S.email))
+    .replaceAll("{phone}", encodeURIComponent(S.phone || ""))
+    .replaceAll("{id}", encodeURIComponent(S.id));
   let qShown = false, qDone = false;
   const showCta = () => {
     qShown = true;
@@ -71,18 +73,24 @@
     $("ctaBtn").textContent = C.questionnaire.buttonText;
     addMsg(C.hostName, fill(C.questionnaire.hostMessage), "host");
   };
+  const markDone = (external) => {
+    if (qDone) return;
+    qDone = true;
+    if (external) send("questionnaire_submitted", { source: "external_form" });
+    setTimeout(() => $("modal").classList.remove("open"), 1500);
+    $("cta").style.display = "none";
+  };
+  // שאלון חיצוני: הדף נטען פעם אחת, ואחרי השליחה הוא עובר לדף אחר, כלומר טעינה שנייה = הושלם
+  let frameLoads = 0;
+  $("qframe").addEventListener("load", () => { if ($("qframe").src && ++frameLoads >= 2) markDone(true); });
   $("ctaBtn").addEventListener("click", () => {
     send("questionnaire_opened");
-    if (C.questionnaire.embed) { $("qframe").src = qUrl(); $("modal").classList.add("open"); }
+    if (C.questionnaire.embed) { frameLoads = 0; $("qframe").src = qUrl(); $("modal").classList.add("open"); }
     else window.open(qUrl(), "_blank", "noopener");
   });
   $("close").addEventListener("click", () => $("modal").classList.remove("open"));
   addEventListener("message", (ev) => {
-    if (ev.data && ev.data.type === "questionnaire:done") {
-      qDone = true;
-      setTimeout(() => $("modal").classList.remove("open"), 1500);
-      $("cta").style.display = "none";
-    }
+    if (ev.data && ev.data.type === "questionnaire:done") markDone(false);
   });
 
   // ---------- נגן ----------

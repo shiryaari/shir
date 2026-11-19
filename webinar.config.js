@@ -41,10 +41,11 @@ module.exports = {
     fallback: "שאלה מצוינת, {name}! נתייחס לזה בהמשך.",
   },
 
-  // השאלון. url יכול להיות הדף הפנימי או כתובת חיצונית. תבניות: {token} {name} {email}
+  // השאלון. url יכול להיות הדף הפנימי או כתובת חיצונית. תבניות: {token} {name} {email} {phone} {id}
+  // השאלון של שיר שולח את התשובות ישירות ל-Make שלה, ואנחנו רק מעבירים לו שם, טלפון ומייל.
   questionnaire: {
     atSeconds: 1800,  // באיזו שנייה מופיע הכפתור (1800 = דקה 30)
-    url: "/questionnaire.html?t={token}",
+    url: "https://shir-yaari.co.il/pitzuach-intro/?name={name}&phone={phone}&email={email}&lead_id={id}&ref=webinar",
     embed: true,      // true = נפתח בחלון בתוך החדר, false = נפתח בלשונית חדשה
     buttonText: "למילוי השאלון",
     hostMessage: "{name}, עכשיו הגיע הזמן לשאלון הקצר. לחצי על הכפתור 👇",

@@ -14,6 +14,8 @@ module.exports = async (req, res) => {
     name: s.n,
     firstName: first,
     email: s.e,
+    phone: s.p,
+    id: s.id,
     start: s.s,
     serverNow: Date.now(),
     config: {
