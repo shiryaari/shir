@@ -60,11 +60,43 @@
     });
   };
 
-  $("form").addEventListener("submit", (ev) => {
+  // ----- צ'אט חי: הודעות של כל הצופות בסשן ותשובות של שיר בזמן אמת -----
+  const liveOn = C.liveChat && C.liveChat.enabled;
+  const liveSeen = new Set();
+  let liveAfter = 0;
+  async function livePoll() {
+    try {
+      const r = await fetch(`/api/chat-poll?t=${encodeURIComponent(token)}&after=${liveAfter}`, { cache: "no-store" });
+      if (!r.ok) return;
+      const d = await r.json();
+      for (const m of d.messages) {
+        liveAfter = Math.max(liveAfter, m.at);
+        if (liveSeen.has(m.id)) continue;
+        liveSeen.add(m.id);
+        if (m.role === "host") addMsg(m.from, m.text, "host");
+        else if (m.mine) addMsg(S.firstName, m.text, "me");
+        else addMsg(m.from, m.text, "");
+      }
+    } catch {}
+  }
+  if (liveOn) { livePoll(); setInterval(livePoll, (C.liveChat.pollSeconds || 3) * 1000); }
+
+  $("form").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const text = $("text").value.trim(); if (!text) return;
     $("text").value = "";
-    addMsg(S.firstName, text, "me");
+    let sentLive = false;
+    if (liveOn) {
+      try {
+        const r = await fetch("/api/chat-send", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t: token, text }) });
+        if (r.ok) {
+          const d = await r.json();
+          if (!liveSeen.has(d.id)) { liveSeen.add(d.id); addMsg(S.firstName, text, "me"); }
+          sentLive = true;
+        }
+      } catch {}
+    }
+    if (!sentLive) addMsg(S.firstName, text, "me");
     send("chat_message", { text: text.slice(0, 500), at_second: Math.round(Math.max(0, elapsed())) });
     const rule = C.replies.rules.find((r) => r.match.some((k) => text.includes(k)));
     const [lo, hi] = C.replies.delaySeconds;

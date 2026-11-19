@@ -27,6 +27,7 @@ module.exports = async (req, res) => {
       durationSeconds: cfg.durationSeconds,
       chat: cfg.chat,
       chatReplay: cfg.chatReplay,
+      liveChat: cfg.liveChat,
       replies: cfg.replies,
       questionnaire: cfg.questionnaire,
       progressMilestones: cfg.progressMilestones,

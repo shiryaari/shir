@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>מסך ניהול</title>
+<link rel="stylesheet" href="/styles.css">
+<style>
+body{background:#0d0d10;color:#f4f0e6}
+.wrap{max-width:640px}
+h1{font-size:1.3rem}
+.box{border:1px solid rgba(212,175,90,.35);border-radius:14px;padding:12px;background:#141418}
+#list{height:55vh;overflow:auto;display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.m{background:#1d1d22;border-radius:12px;padding:8px 12px}
+.m b{display:block;font-size:.8rem;color:#f5e3a0}
+.m.host{background:#3a2f12}
+.m.unanswered{outline:1px solid #d4af5a}
+.m button{margin-top:6px;padding:4px 10px;font-size:.8rem;background:transparent;color:#d4af5a;border:1px solid #d4af5a;border-radius:8px;cursor:pointer}
+form{display:flex;gap:8px}
+input{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(212,175,90,.35);background:#0a0a0c;color:#f4f0e6;font:inherit}
+.bt{padding:12px 18px;border:0;border-radius:10px;background:#d4af5a;color:#17140b;font-weight:800;cursor:pointer}
+.small{color:#a9a9b0;font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap" style="padding-top:20px">
+  <h1>מסך ניהול: צ'אט חי</h1>
+  <div class="box" id="login">
+    <p class="small">הקלידי את סיסמת הניהול (HOST_SECRET).</p>
+    <form id="lf"><input id="secret" type="password" placeholder="סיסמה" autocomplete="current-password"><button class="bt">כניסה</button></form>
+    <div class="small" id="lerr" style="color:#ff9c8a"></div>
+  </div>
+  <div id="main" hidden>
+    <div class="small" id="info"></div>
+    <div id="list" class="box"></div>
+    <form id="rf"><input id="reply" placeholder="כתבי תשובה לכולן..." autocomplete="off"><button class="bt">שליחה</button></form>
+  </div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+let secret = "", session = null, after = 0, timer = null;
+const seen = new Set();
+try { secret = localStorage.getItem("hostSecret") || ""; } catch {}
+
+async function poll() {
+  const r = await fetch(`/api/host-poll?secret=${encodeURIComponent(secret)}${session ? "&session=" + session : ""}&after=${after}`, { cache: "no-store" });
+  if (r.status === 401) { localStorage.removeItem("hostSecret"); location.reload(); return; }
+  if (!r.ok) { $("info").textContent = "שגיאה בחיבור (בדקי שהאחסון מחובר ב-Vercel)"; return; }
+  const d = await r.json();
+  if (d.session && !session) session = d.session;
+  $("info").textContent = d.session ? "סשן: " + new Date(d.session).toLocaleString("he-IL", { weekday: "long", hour: "2-digit", minute: "2-digit" }) : "אין עדיין הודעות";
+  const list = $("list"), stick = list.scrollTop + list.clientHeight >= list.scrollHeight - 40;
+  for (const m of d.messages) {
+    after = Math.max(after, m.at);
+    if (seen.has(m.id)) continue; seen.add(m.id);
+    const el = document.createElement("div");
+    el.className = "m " + (m.role === "host" ? "host" : "unanswered");
+    const b = document.createElement("b"); b.textContent = m.from + (m.role === "host" ? " (את)" : "");
+    const t = document.createElement("span"); t.textContent = m.text;
+    el.append(b, t);
+    if (m.role !== "host") {
+      const btn = document.createElement("button"); btn.textContent = "הגיבי";
+      btn.onclick = () => { $("reply").value = m.from + ", "; $("reply").focus(); };
+      el.append(btn);
+    }
+    list.append(el);
+  }
+  if (stick) list.scrollTop = list.scrollHeight;
+}
+function start() {
+  $("login").hidden = true; $("main").hidden = false;
+  poll(); timer = setInterval(poll, 3000);
+}
+$("lf").addEventListener("submit", async (e) => {
+  e.preventDefault(); secret = $("secret").value;
+  const r = await fetch(`/api/host-poll?secret=${encodeURIComponent(secret)}&after=0`);
+  if (r.status === 401) return ($("lerr").textContent = "סיסמה שגויה");
+  if (r.status === 503) return ($("lerr").textContent = "המערכת עוד לא מוגדרת (HOST_SECRET או אחסון)");
+  try { localStorage.setItem("hostSecret", secret); } catch {}
+  start();
+});
+$("rf").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = $("reply").value.trim(); if (!text || !session) return;
+  $("reply").value = "";
+  await fetch("/api/host-reply", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ secret, session, text }) });
+  poll();
+});
+if (secret) start();
+</script>
+</body>
+</html>

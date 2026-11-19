@@ -37,6 +37,10 @@ module.exports = {
     { at: 3380, from: "host", text: "אפשר למלא את השאלון גם בזמן שהסרטון רץ, הוא מופיע מתחת לוידאו." },
   ],
 
+  // צ'אט חי: הצופות כותבות והכול מופיע לכולן באותו סשן, ושיר עונה מ-/host.html בזמן אמת.
+  // דורש חיבור אחסון ב-Vercel (Storage -> Upstash Redis) ו-HOST_SECRET (ראי README).
+  liveChat: { enabled: true, hostName: "שיר", pollSeconds: 3 },
+
   // צ'אט משידור קודם (אופציונלי): הודעות אמיתיות שנשמרו מוובינר קודם, מקובץ public/chat-replay.json.
   // ממלאים אותו מהייצוא המקורי: node scripts/import-chat.js chat.csv  .
   // כל עוד הקובץ ריק, לא מוצג כלום.
