@@ -54,7 +54,8 @@
     C.chat.forEach((m, i) => {
       if (m.at <= e && !shown.has(i)) {
         shown.add(i);
-        addMsg(m.from === "host" ? C.hostName : m.from, fill(m.text), m.from === "host" ? "host" : "");
+        const isHost = m.from === "host" || m.from === C.hostName;
+        addMsg(isHost ? C.hostName : m.from, fill(m.text), isHost ? "host" : "");
       }
     });
   };
