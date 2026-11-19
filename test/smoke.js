@@ -43,9 +43,9 @@ const post = (p, b) => fetch(base + p, { method: "POST", headers: { "content-typ
   await page.waitForFunction(() => document.querySelectorAll(".msg").length >= 2, null, { timeout: 30000 });
   const first = await page.textContent(".msg.host");
   assert(first.includes("דנה"), "personal name in chat: " + first);
-  await page.fill("#text", "כמה עולה?");
+  await page.fill("#text", "איפה השאלון?");
   await page.press("#text", "Enter");
-  await page.waitForFunction(() => [...document.querySelectorAll(".msg.host")].some((m) => m.textContent.includes("הוובינר") || m.textContent.includes("בסוף")), null, { timeout: 15000 });
+  await page.waitForFunction(() => [...document.querySelectorAll(".msg.host")].some((m) => m.textContent.includes("מתחת לסרטון")), null, { timeout: 15000 });
   await page.screenshot({ path: "/tmp/room.png" });
   assert.deepStrictEqual(errors, [], "page errors");
   await browser.close();
