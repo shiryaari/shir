@@ -1,0 +1,56 @@
+# חדר וובינר אוטומטי
+
+חדר וובינר מוקלט ואינטראקטיבי: סרטון מ-Vimeo שרץ לפי מועד הסשן של כל נרשמת, צ'אט עם הודעות מתוזמנות ותגובות, שאלון באמצע, ואירועים שנשלחים ל-Make (ומשם ל-CRM, ManyChat ורב מסר).
+אין בסיס נתונים: ה-CRM ו-Make הם המאגר. הקישור האישי של כל נרשמת הוא טוקן חתום.
+
+## מה לערוך
+הכול ב-`webinar.config.js`: מזהה Vimeo, אורך, הודעות הצ'אט, תגובות, דקת השאלון ושם המארחת.
+
+## הרצה מקומית
+```
+cp .env.example .env     # ולמלא SIGNING_SECRET
+npm run dev              # http://localhost:3000
+npm test                 # בדיקת עשן מקצה לקצה
+```
+בלי `MAKE_WEBHOOK_URL` האירועים רק מודפסים בטרמינל. בלי `vimeoId` החדר רץ במצב בדיקה.
+
+## העלאה לאוויר (Vercel)
+1. מחברים את הריפו ל-Vercel (Framework: Other, בלי build).
+2. ב-Environment Variables: `SIGNING_SECRET` (מחרוזת אקראית ארוכה), `MAKE_WEBHOOK_URL`, `SITE_URL` (הכתובת הסופית), `ALLOWED_ORIGINS` (הדומיין של דף הנחיתה).
+3. מחברים תת-דומיין, למשל `webinar.הדומיין-שלך.co.il`.
+
+## Vimeo
+בהגדרות הסרטון: Privacy → Hide from Vimeo, ו-Where can this be embedded → Specific domains → הדומיין של החדר. לסרטון פרטי שמים ב-`vimeoId` את `מספר/hash`.
+
+## חיבור דף הנחיתה שלך
+הטופס שולח `POST /api/register` (JSON) לכתובת החדר:
+```js
+const r = await fetch("https://webinar.YOUR-DOMAIN/api/register", {
+  method: "POST", headers: { "content-type": "application/json" },
+  body: JSON.stringify({ name, email, phone, slot: "now" /* או מספר ms מ-/api/slots */ })
+});
+const { roomUrl } = await r.json();
+location.href = "https://webinar.YOUR-DOMAIN/thanks.html?t=" + new URL(roomUrl).searchParams.get("t");
+```
+`GET /api/slots` מחזיר את המועדים הקרובים. `public/index.html` היא דוגמה עובדת.
+
+## אירועים שמגיעים ל-Make
+כל אירוע הוא POST ל-webhook עם `event`, `name`, `email`, `phone`, `registration_id`, `session_start`, `webinar`, ו-`data` לפי האירוע:
+
+| event | מתי | data |
+|---|---|---|
+| `registered` | הרשמה | `room_url`, `session_start_ms` |
+| `joined` | לחצה "כניסה" | `joined_at_second` |
+| `progress` | 25/50/75/100% | `percent`, `watched_seconds` |
+| `questionnaire_opened` | פתחה שאלון | |
+| `questionnaire_submitted` | שלחה שאלון | `answers` |
+| `left` | יצאה | `watched_seconds`, `at_second` |
+
+## סנריו ב-Make (מומלץ)
+1. **Custom webhook** מקבל הכול, **Router** לפי `event`.
+2. `registered` → יצירת איש קשר ב-CRM וברב מסר, תגית ב-ManyChat, שליחת `room_url` במייל ובוואטסאפ. אחר כך **Sleep** עד 24 שעות, שעה, ו-10 דקות לפני `session_start`, ובכל אחד שליחת תזכורת (בוואטסאפ מחוץ ל-24 שעות צריך תבנית מאושרת).
+3. **"לא הגיעה":** אחרי `session_start` + 10 דקות, בודקים ב-CRM אם יש תגית `webinar_attended`. אם אין, מסמנים `webinar_missed` ושולחים הודעת החמצה.
+4. `joined` → תגית `webinar_attended`. `questionnaire_submitted` → שמירת התשובות ב-CRM ושליחת הודעה לפי התשובה.
+
+## שקיפות
+החדר מציג "וובינר מוקלט ואינטראקטיבי". אל תציגי משתתפות מדומות כלקוחות אמיתיות.

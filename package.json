@@ -1,0 +1,11 @@
+{
+  "name": "webinar-room",
+  "version": "0.1.0",
+  "private": true,
+  "description": "חדר וובינר אוטומטי: Vimeo + Make + ManyChat + רב מסר",
+  "scripts": {
+    "dev": "node dev-server.js",
+    "test": "node test/smoke.js"
+  },
+  "engines": { "node": ">=18" }
+}

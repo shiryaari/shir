@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>שאלון</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<!-- שאלון זמני לדוגמה. אפשר להחליף בשאלון שבנית (ראי README). -->
+<div class="wrap">
+  <h1>שאלון קצר</h1>
+  <form id="q" class="card">
+    <label>מה הכי מאתגר אותך היום בעסק?</label>
+    <textarea name="challenge" rows="3" required></textarea>
+    <label>עד כמה את מוכנה להתחיל?</label>
+    <select name="readiness" required>
+      <option value="">בחרי</option>
+      <option>מוכנה עכשיו</option>
+      <option>בחודש הקרוב</option>
+      <option>רק בודקת</option>
+    </select>
+    <button class="btn-block" type="submit">שליחה</button>
+    <div class="error" id="err"></div>
+  </form>
+  <div id="done" class="card hidden"><h1>תודה! 💛</h1><p>קיבלנו את התשובות.</p></div>
+</div>
+<script>
+const t = new URLSearchParams(location.search).get("t");
+document.getElementById("q").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const answers = Object.fromEntries(new FormData(e.target));
+  const r = await fetch("/api/event", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ t, event: "questionnaire_submitted", data: { answers } })
+  });
+  if (!r.ok) return (document.getElementById("err").textContent = "השליחה נכשלה, נסי שוב.");
+  e.target.classList.add("hidden");
+  document.getElementById("done").classList.remove("hidden");
+  parent.postMessage({ type: "questionnaire:done" }, "*");
+});
+</script>
+</body>
+</html>

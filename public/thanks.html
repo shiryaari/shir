@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>נרשמת בהצלחה</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <h1 id="h">נרשמת! 🎉</h1>
+  <div class="card">
+    <p>הוובינר שלך מתחיל ב:</p>
+    <p><b id="when" style="font-size:1.3rem"></b></p>
+    <p class="muted">שלחנו לך את הקישור גם במייל ובוואטסאפ.</p>
+    <a id="link" class="btn btn-block">לכניסה לחדר</a>
+  </div>
+</div>
+<script>
+const t = new URLSearchParams(location.search).get("t");
+fetch("/api/session?t=" + encodeURIComponent(t)).then(r => r.ok ? r.json() : Promise.reject()).then(d => {
+  document.getElementById("h").textContent = `נרשמת, ${d.firstName}! 🎉`;
+  document.getElementById("when").textContent = new Intl.DateTimeFormat("he-IL", { weekday: "long", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }).format(d.start);
+  document.getElementById("link").href = "/room.html?t=" + encodeURIComponent(t);
+}).catch(() => { document.querySelector(".card").innerHTML = "<p>הקישור לא תקין.</p>"; });
+</script>
+</body>
+</html>
