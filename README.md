@@ -32,6 +32,12 @@ const r = await fetch("https://webinar.YOUR-DOMAIN/api/register", {
 const { roomUrl } = await r.json();
 location.href = "https://webinar.YOUR-DOMAIN/thanks.html?t=" + new URL(roomUrl).searchParams.get("t");
 ```
+אחרי ההרשמה מעבירים את הנרשמת לדף התודה שלך עם `email` ו-`lead_id` (זה אותו `registration_id` שמגיע ל-Make, וכך אפשר לחבר את תשובות השאלון לנרשמת):
+```js
+const { id } = await r.json();
+location.href = "https://shir-yaari.co.il/webinar-intro/?email=" + encodeURIComponent(email) + "&lead_id=" + id + "&ref=landing";
+```
+
 `GET /api/slots` מחזיר את המועדים הקרובים. `public/index.html` היא דוגמה עובדת.
 
 ## אירועים שמגיעים ל-Make

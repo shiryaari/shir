@@ -50,5 +50,5 @@ module.exports = async (req, res) => {
     return res.status(502).json({ error: "make_failed" });
   }
 
-  res.status(200).json({ ok: true, token, roomUrl, start });
+  res.status(200).json({ ok: true, id, token, roomUrl, start });
 };
