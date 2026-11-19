@@ -26,6 +26,7 @@ module.exports = async (req, res) => {
       youtubeId: cfg.youtubeId,
       durationSeconds: cfg.durationSeconds,
       chat: cfg.chat,
+      chatReplay: cfg.chatReplay,
       replies: cfg.replies,
       questionnaire: cfg.questionnaire,
       progressMilestones: cfg.progressMilestones,

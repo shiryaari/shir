@@ -37,6 +37,17 @@
     const p = document.createElement("span"); p.textContent = text;
     d.append(b, p); msgs.append(d); msgs.scrollTop = msgs.scrollHeight;
   };
+  // צ'אט משידור קודם: נטען מקובץ, ומסומן בכותרת
+  if (C.chatReplay && C.chatReplay.file) {
+    try {
+      const rr = await fetch(C.chatReplay.file, { cache: "no-store" });
+      const list = rr.ok ? await rr.json() : [];
+      if (Array.isArray(list) && list.length) {
+        C.chat = C.chat.concat(list.map((m) => ({ at: Number(m.at) || 0, from: String(m.name || ""), text: String(m.text || "") })));
+        $("replayLabel").textContent = "· " + (C.chatReplay.label || "משידור קודם");
+      }
+    } catch {}
+  }
   const shown = new Set();
   const tickChat = () => {
     const e = elapsed();
