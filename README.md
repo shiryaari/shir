@@ -16,7 +16,7 @@ npm test                 # בדיקת עשן מקצה לקצה
 
 ## העלאה לאוויר (Vercel)
 1. מחברים את הריפו ל-Vercel (Framework: Other, בלי build).
-2. ב-Environment Variables: `SIGNING_SECRET` (מחרוזת אקראית ארוכה), `MAKE_WEBHOOK_URL`, `SITE_URL` (הכתובת הסופית), `ALLOWED_ORIGINS` (הדומיין של דף הנחיתה).
+2. ב-Environment Variables: `SIGNING_SECRET` (מחרוזת אקראית ארוכה), `MAKE_REGISTRATION_WEBHOOK_URL` (ה-webhook של סנריו ההרשמה הקיים, מקבל את ההרשמה באותו מבנה ש-Talexa שלחה), `MAKE_EVENTS_WEBHOOK_URL` (סנריו אירועי החדר), `SITE_URL` (הכתובת הסופית), `ALLOWED_ORIGINS` (הדומיין של דף הנחיתה).
 3. מחברים תת-דומיין, למשל `webinar.הדומיין-שלך.co.il`.
 
 ## יוטיוב (חלופה ל-Vimeo)
@@ -56,7 +56,9 @@ location.href = "https://shir-yaari.co.il/webinar-intro/?email=" + encodeURIComp
 | `chat_message` | כתבה בצ'אט | `text`, `at_second` |
 | `left` | יצאה | `watched_seconds`, `at_second` |
 
-## סנריו ב-Make (מומלץ)
+## סנריו ב-Make
+הרשמה נשלחת לסנריו הקיים באותו מבנה של Talexa (`event: "lead"`), ולכן הפיקסל, פייפדרייב, הגיליון ורב מסר ממשיכים לעבוד. אירועי החדר מטופלים בסנריו חדש ("וובינר אוטומטי חדש | אירועי החדר → פייפדרייב") שמעדכן את שדות הוובינר בעסקה ב-Pipedrive. ההצעה המקורית:
+
 1. **Custom webhook** מקבל הכול, **Router** לפי `event`.
 2. `registered` → יצירת איש קשר ב-CRM וברב מסר, תגית ב-ManyChat, שליחת `room_url` במייל ובוואטסאפ. אחר כך **Sleep** עד 24 שעות, שעה, ו-10 דקות לפני `session_start`, ובכל אחד שליחת תזכורת (בוואטסאפ מחוץ ל-24 שעות צריך תבנית מאושרת).
 3. **"לא הגיעה":** אחרי `session_start` + 10 דקות, בודקים ב-CRM אם יש תגית `webinar_attended`. אם אין, מסמנים `webinar_missed` ושולחים הודעת החמצה.
