@@ -10,7 +10,7 @@ module.exports = {
   // יוטיוב (אם אין vimeoId): המזהה מהקישור, למשל youtube.com/watch?v=ABC123xyz -> "ABC123xyz".
   // מומלץ סרטון "לא רשום" (Unlisted).
   youtubeId: "i9gmOG0iJ7Q",
-  durationSeconds: 60 * 60, // אורך ההקלטה בשניות
+  durationSeconds: 67 * 60, // אורך ההקלטה בשניות (שעה ו-7 דקות)
 
   // מועדי הסשנים
   slots: {
