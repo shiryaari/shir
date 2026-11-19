@@ -53,6 +53,7 @@ location.href = "https://shir-yaari.co.il/webinar-intro/?email=" + encodeURIComp
 | `progress` | 25/50/75/100% | `percent`, `watched_seconds` |
 | `questionnaire_opened` | פתחה שאלון | |
 | `questionnaire_submitted` | שלחה שאלון | `answers` |
+| `chat_message` | כתבה בצ'אט | `text`, `at_second` |
 | `left` | יצאה | `watched_seconds`, `at_second` |
 
 ## סנריו ב-Make (מומלץ)

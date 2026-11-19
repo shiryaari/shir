@@ -3,7 +3,7 @@ const { verify } = require("../lib/token");
 const { sendToMake } = require("../lib/make");
 const { cors, body } = require("../lib/http");
 
-const ALLOWED = new Set(["joined", "progress", "left", "questionnaire_opened", "questionnaire_submitted"]);
+const ALLOWED = new Set(["joined", "progress", "left", "questionnaire_opened", "questionnaire_submitted", "chat_message"]);
 
 module.exports = async (req, res) => {
   if (cors(req, res)) return;

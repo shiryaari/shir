@@ -53,6 +53,7 @@
     const text = $("text").value.trim(); if (!text) return;
     $("text").value = "";
     addMsg(S.firstName, text, "me");
+    send("chat_message", { text: text.slice(0, 500), at_second: Math.round(Math.max(0, elapsed())) });
     const rule = C.replies.rules.find((r) => r.match.some((k) => text.includes(k)));
     const [lo, hi] = C.replies.delaySeconds;
     setTimeout(() => addMsg(C.hostName, fill((rule ? rule.text : C.replies.fallback)), "host"), (lo + Math.random() * (hi - lo)) * 1000);
