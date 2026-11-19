@@ -23,6 +23,7 @@ module.exports = async (req, res) => {
       hostName: cfg.hostName,
       badge: cfg.badge,
       vimeoId: cfg.vimeoId,
+      youtubeId: cfg.youtubeId,
       durationSeconds: cfg.durationSeconds,
       chat: cfg.chat,
       replies: cfg.replies,

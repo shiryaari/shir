@@ -98,8 +98,31 @@
   const reported = new Set();
   const stage = $("stage");
 
+  async function startYouTube(target) {
+    await new Promise((res) => {
+      if (window.YT && YT.Player) return res();
+      window.onYouTubeIframeAPIReady = res;
+      const sc = document.createElement("script"); sc.src = "https://www.youtube.com/iframe_api"; document.head.append(sc);
+    });
+    const holder = document.createElement("div"); holder.id = "ytp"; stage.append(holder);
+    const p = new YT.Player("ytp", {
+      videoId: C.youtubeId, width: "100%", height: "100%",
+      playerVars: { controls: 0, disablekb: 1, rel: 0, modestbranding: 1, playsinline: 1, autoplay: 1, start: Math.floor(target) },
+      events: {
+        onReady: (e) => { e.target.seekTo(target, true); e.target.playVideo(); },
+        onStateChange: (e) => { if (e.data === YT.PlayerState.PAUSED && elapsed() < C.durationSeconds) e.target.playVideo(); },
+      },
+    });
+    setInterval(() => { // תיקון סטייה מול השעון, כמו שידור חי
+      try { const e = elapsed(); if (e >= 0 && e < C.durationSeconds && Math.abs(p.getCurrentTime() - e) > 4) p.seekTo(e, true); } catch {}
+    }, 2000);
+  }
+
   async function startVideo() {
     const target = Math.max(0, elapsed());
+    const shield = document.createElement("div"); // חוסם לחיצות על הסרטון (השהיה/דילוג)
+    shield.style.cssText = "position:absolute;inset:0;z-index:2";
+    if (!C.vimeoId && C.youtubeId) { await startYouTube(target); stage.append(shield); return; }
     if (!C.vimeoId) {                       // מצב בדיקה בלי וידאו
       const m = document.createElement("div");
       m.className = "mock"; m.textContent = "מצב בדיקה: כאן יופיע הסרטון מ-Vimeo";
@@ -109,7 +132,7 @@
     const ifr = document.createElement("iframe");
     ifr.allow = "autoplay; fullscreen; picture-in-picture";
     ifr.src = `https://player.vimeo.com/video/${id}?${h ? "h=" + h + "&" : ""}controls=0&autoplay=1&playsinline=1&title=0&byline=0&portrait=0&dnt=1`;
-    stage.append(ifr);
+    stage.append(ifr); stage.append(shield);
     player = new Vimeo.Player(ifr);
     await player.ready();
     await player.setCurrentTime(target);

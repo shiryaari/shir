@@ -7,6 +7,9 @@ module.exports = {
   // Vimeo: המספר מהקישור, למשל 123456789. לסרטון פרטי: "123456789/abcdef1234" (המספר/ה-hash)
   // אם ריק, החדר רץ במצב בדיקה בלי וידאו.
   vimeoId: "",
+  // יוטיוב (אם אין vimeoId): המזהה מהקישור, למשל youtube.com/watch?v=ABC123xyz -> "ABC123xyz".
+  // מומלץ סרטון "לא רשום" (Unlisted).
+  youtubeId: "",
   durationSeconds: 60 * 60, // אורך ההקלטה בשניות
 
   // מועדי הסשנים

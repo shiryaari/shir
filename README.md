@@ -19,6 +19,9 @@ npm test                 # בדיקת עשן מקצה לקצה
 2. ב-Environment Variables: `SIGNING_SECRET` (מחרוזת אקראית ארוכה), `MAKE_WEBHOOK_URL`, `SITE_URL` (הכתובת הסופית), `ALLOWED_ORIGINS` (הדומיין של דף הנחיתה).
 3. מחברים תת-דומיין, למשל `webinar.הדומיין-שלך.co.il`.
 
+## יוטיוב (חלופה ל-Vimeo)
+שמים ב-`youtubeId` את המזהה מהקישור והסרטון מועלה כ"לא רשום" (Unlisted). ביוטיוב אי אפשר להגביל הטמעה לדומיין, לכן מי שימצא את הקישור יוכל לצפות בסרטון מחוץ לחדר. ל-Vimeo יש הגבלה כזאת, ולכן הוא עדיף.
+
 ## Vimeo
 בהגדרות הסרטון: Privacy → Hide from Vimeo, ו-Where can this be embedded → Specific domains → הדומיין של החדר. לסרטון פרטי שמים ב-`vimeoId` את `מספר/hash`.
 
