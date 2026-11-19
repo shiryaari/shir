@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const cfg = require("../webinar.config");
 const { sign } = require("../lib/token");
 const { sendToMake } = require("../lib/make");
-const { isValidSlot } = require("../lib/slots");
+const { isValidSlot, nextSlots } = require("../lib/slots");
 const { cors, body, siteUrl } = require("../lib/http");
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).json({ error: "method_not_allowed" });
 
   const b = body(req);
-  const name = String(b.name || "").trim().slice(0, 80);
+  const name = String(b.name || b.full_name || "").trim().slice(0, 80);
   const email = String(b.email || "").trim().toLowerCase().slice(0, 120);
   const phone = String(b.phone || "").trim().slice(0, 30);
   if (!name) return res.status(400).json({ error: "name_required" });
@@ -22,6 +22,8 @@ module.exports = async (req, res) => {
   let start;
   if (b.slot === "now") {
     start = now + cfg.instantDelaySeconds * 1000;
+  } else if (b.slot === undefined || b.slot === "" || b.slot === "next") {
+    start = nextSlots(cfg.slots, now, 1)[0]; // בלי בחירה (כמו בדף הנחיתה): הסשן הקרוב
   } else {
     start = Number(b.slot);
     if (!isValidSlot(cfg.slots, start) || start < now - 60000) {
@@ -29,7 +31,8 @@ module.exports = async (req, res) => {
     }
   }
 
-  const id = crypto.randomBytes(6).toString("hex");
+  // אם הדף שלח event_id תקין משתמשים בו (כך הפיקסל והמערכת חולקים אותו מזהה)
+  const id = /^[A-Za-z0-9_-]{6,40}$/.test(String(b.event_id || "")) ? String(b.event_id) : crypto.randomBytes(6).toString("hex");
   const token = sign({ id, n: name, e: email, p: phone, s: start });
   const roomUrl = `${siteUrl(req)}/room.html?t=${token}`;
 

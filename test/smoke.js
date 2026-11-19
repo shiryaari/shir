@@ -21,6 +21,13 @@ const post = (p, b) => fetch(base + p, { method: "POST", headers: { "content-typ
   assert(reg.token && reg.roomUrl, "token");
   assert.strictEqual((await fetch(base + "/api/session?t=" + reg.token + "x")).status, 401, "tampered token");
   assert.strictEqual((await post("/api/event", { t: reg.token, event: "hack" })).status, 400);
+  // הרשמה בסגנון דף הנחיתה: text/plain, full_name, event_id, בלי slot
+  r = await fetch(base + "/api/register", { method: "POST", headers: { "content-type": "text/plain;charset=UTF-8" },
+    body: JSON.stringify({ event: "lead", full_name: "מיכל לוי", email: "michal@example.com", phone: "0521234567", event_id: "lp-abc123xyz", utm_source: "fb" }) });
+  const lp = await r.json();
+  assert.strictEqual(r.status, 200, "landing-style register");
+  assert.strictEqual(lp.id, "lp-abc123xyz", "event_id reused");
+  assert((await (await fetch(base + "/api/session?t=" + lp.token)).json()).start > Date.now(), "next slot in the future");
   console.log("API ok");
 
   // דפדפן
