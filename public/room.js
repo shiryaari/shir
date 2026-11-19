@@ -44,7 +44,7 @@
       const list = rr.ok ? await rr.json() : [];
       if (Array.isArray(list) && list.length) {
         C.chat = C.chat.concat(list.map((m) => ({ at: Number(m.at) || 0, from: String(m.name || ""), text: String(m.text || "") })));
-        $("replayLabel").textContent = "· " + (C.chatReplay.label || "משידור קודם");
+        if (C.chatReplay.label) $("replayLabel").textContent = "· " + C.chatReplay.label;
       }
     } catch {}
   }

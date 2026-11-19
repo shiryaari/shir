@@ -1,4 +1,4 @@
-// בדיקת צ'אט משידור קודם: הודעה מהקובץ מופיעה, והכותרת מסמנת אותה. הקובץ מוחזר לריק בסוף.
+// בדיקת צ'אט מקובץ: הודעה מהקובץ מופיעה, ובלי תווית בכותרת כברירת מחדל. הקובץ מוחזר לריק בסוף.
 process.env.SIGNING_SECRET = "test-secret";
 process.env.PORT = "3116";
 const fs = require("fs");
@@ -20,7 +20,7 @@ const { sign } = require("../lib/token");
     await page.waitForSelector("#enter:not([hidden])", { timeout: 5000 });
     await page.click("#enter");
     await page.waitForFunction(() => [...document.querySelectorAll(".msg")].some((m) => m.textContent.includes("היי שיר")), null, { timeout: 5000 });
-    assert.match(await page.textContent("#replayLabel"), /משידור קודם/);
+    assert.strictEqual((await page.textContent("#replayLabel")).trim(), "", "no label by default");
     await browser.close();
     console.log("replay ok");
   } finally {

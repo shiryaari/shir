@@ -2,11 +2,12 @@
 // ממיר קובץ CSV של צ'אט משידור קודם לקובץ שהחדר קורא (public/chat-replay.json).
 // שימוש:  node scripts/import-chat.js chat.csv
 // עמודות (עם או בלי כותרת): זמן, שם, הודעה.   זמן: mm:ss או h:mm:ss (מתחילת הסרטון)
-// השם נחתך לשם פרטי בלבד (פרטיות).
+// השם נשמר כמו בקובץ. עם הדגל --first-names נשמר שם פרטי בלבד.
 const fs = require("fs");
 const path = require("path");
 
-const src = process.argv[2];
+const src = process.argv.slice(2).find((a) => !a.startsWith("--"));
+const firstNamesOnly = process.argv.includes("--first-names");
 if (!src) { console.error("usage: node scripts/import-chat.js chat.csv"); process.exit(1); }
 
 function parseCsv(text) {
@@ -32,7 +33,8 @@ const out = [];
 for (const r of parseCsv(fs.readFileSync(src, "utf8").replace(/^﻿/, ""))) {
   const at = toSeconds(r[0]);
   if (at === null) continue; // שורת כותרת
-  const name = String(r[1] || "").trim().split(/\s+/)[0];
+  const full = String(r[1] || "").trim();
+  const name = firstNamesOnly ? full.split(/\s+/)[0] : full;
   const text = String(r.slice(2).join(",") || "").trim();
   if (name && text) out.push({ at, name, text });
 }
