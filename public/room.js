@@ -66,24 +66,19 @@
     .replaceAll("{email}", encodeURIComponent(S.email))
     .replaceAll("{phone}", encodeURIComponent(S.phone || ""))
     .replaceAll("{id}", encodeURIComponent(S.id));
-  let qShown = false, qDone = false;
-  const showCta = () => {
-    qShown = true;
+  let qDone = false, activeCta = -1;
+  const syncCta = () => {
+    const e = elapsed();
+    const i = qDone ? -1 : C.questionnaire.ctas.findIndex((c) => e >= c.at && e < c.at + c.durationSeconds);
+    if (i === activeCta) return;
+    activeCta = i;
+    if (i < 0) { $("cta").style.display = "none"; return; }
+    const c = C.questionnaire.ctas[i];
+    $("ctaTitle").textContent = fill(c.title);
+    $("ctaDesc").textContent = fill(c.description || "");
+    $("ctaBtn").textContent = c.buttonText;
     $("cta").style.display = "block";
-    $("ctaText").textContent = fill(C.questionnaire.hostMessage);
-    $("ctaBtn").textContent = C.questionnaire.buttonText;
-    addMsg(C.hostName, fill(C.questionnaire.hostMessage), "host");
   };
-  const markDone = (external) => {
-    if (qDone) return;
-    qDone = true;
-    if (external) send("questionnaire_submitted", { source: "external_form" });
-    setTimeout(() => $("modal").classList.remove("open"), 1500);
-    $("cta").style.display = "none";
-  };
-  // שאלון חיצוני: הדף נטען פעם אחת, ואחרי השליחה הוא עובר לדף אחר, כלומר טעינה שנייה = הושלם
-  let frameLoads = 0;
-  $("qframe").addEventListener("load", () => { if ($("qframe").src && ++frameLoads >= 2) markDone(true); });
   $("ctaBtn").addEventListener("click", () => {
     send("questionnaire_opened");
     if (C.questionnaire.embed) { frameLoads = 0; $("qframe").src = qUrl(); $("modal").classList.add("open"); }
@@ -168,7 +163,7 @@
       }
     }
     if (e >= 0) tickChat();
-    if (e >= C.questionnaire.atSeconds && !qShown && !qDone && e < C.durationSeconds + 600) showCta();
+    syncCta();
 
     if (entered && !document.hidden) {
       watched += (Date.now() - lastTick) / 1000;
@@ -184,12 +179,6 @@
       if (!entered) { $("coverText").textContent = "הסשן הזה הסתיים"; $("count").hidden = true; $("enter").hidden = true; }
       else stage.innerHTML = `<div class="cover"><div style="font-size:1.6rem">${C.endedMessage}</div></div>`;
       addMsg(C.hostName, C.endedMessage, "host");
-      if (entered && !qDone && C.questionnaire.endReminder) {
-        $("cta").style.display = "block";
-        $("ctaText").textContent = fill(C.questionnaire.endReminder);
-        $("ctaBtn").textContent = C.questionnaire.buttonText;
-        addMsg(C.hostName, fill(C.questionnaire.endReminder), "host");
-      }
     }
   }, 500);
 
