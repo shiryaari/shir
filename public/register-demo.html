@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>הרשמה לוובינר</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">דף הרשמה לדוגמה</span>
+  <h1>הרשמה לוובינר</h1>
+  <p class="muted">זה דף דוגמה. את יכולה לשלוח את אותו טופס מדף הנחיתה שלך (ראי README).</p>
+  <form id="f" class="card">
+    <label for="name">שם מלא</label><input id="name" required autocomplete="name">
+    <label for="email">אימייל</label><input id="email" type="email" required autocomplete="email" dir="ltr">
+    <label for="phone">טלפון (לוואטסאפ)</label><input id="phone" type="tel" autocomplete="tel" dir="ltr">
+    <label for="slot">מתי נוח לך?</label><select id="slot"></select>
+    <button class="btn-block" id="go" type="submit">הרשמה</button>
+    <div class="error" id="err"></div>
+  </form>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+fetch("/api/slots").then(r => r.json()).then(({ slots, instantDelaySeconds }) => {
+  $("slot").innerHTML = `<option value="now">תכף, מתחילים עוד ${instantDelaySeconds} שניות</option>` +
+    slots.map(s => `<option value="${s.ms}">${s.label}</option>`).join("");
+});
+$("f").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("go").disabled = true; $("err").textContent = "";
+  try {
+    const slot = $("slot").value;
+    const r = await fetch("/api/register", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: $("name").value, email: $("email").value, phone: $("phone").value, slot: slot === "now" ? "now" : Number(slot) })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    location.href = "/thanks.html?t=" + encodeURIComponent(d.token);
+  } catch (err) {
+    $("err").textContent = "משהו השתבש, נסי שוב (" + err.message + ")";
+    $("go").disabled = false;
+  }
+});
+</script>
+</body>
+</html>

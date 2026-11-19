@@ -1,47 +1,211 @@
 <!doctype html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>הרשמה לוובינר</title>
-<link rel="stylesheet" href="/styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>איך הפכתי עסק שהכניס 11,000 ₪ בחודש לעסק שהכניס 109,000 ₪ בחודש | שיר יערי</title>
+<meta name="description" content="וובינר לבעלות עסקים שמוכרות ידע או שירות: מה השתנה בעסק שלי, ואיך גם את יכולה לבנות עסק שמייצר 6 ספרות כל חודש, באופן יציב.">
+<style>
+:root{--bg:#fbf8ff;--ink:#241a33;--muted:#6e6280;--brand:#7c3aed;--brand2:#5b21b6;--card:#fff;--line:#e8def5;--soft:#f1e9fd}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font-family:"Heebo",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;font-size:18px}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+section{padding:44px 0}
+h1{font-size:clamp(1.9rem,6vw,3rem);line-height:1.15;margin:12px 0}
+h2{font-size:clamp(1.5rem,4.6vw,2.1rem);line-height:1.25;margin:0 0 16px}
+h3{font-size:1.25rem;margin:0 0 8px}
+.eyebrow{display:inline-block;background:var(--soft);color:var(--brand2);font-weight:700;font-size:.85rem;padding:6px 14px;border-radius:999px}
+.num{color:var(--brand);font-weight:800}
+.lead{font-size:1.15rem;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 6px 24px rgba(124,58,237,.08)}
+form label{display:block;font-weight:700;margin:12px 0 6px;font-size:.95rem}
+form input[type=text],form input[type=email],form input[type=tel]{width:100%;font:inherit;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+form input:focus{outline:2px solid var(--brand);border-color:var(--brand)}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:.85rem;color:var(--muted);margin-top:12px}
+.consent input{margin-top:4px;width:18px;height:18px;flex:none}
+.btn{display:block;width:100%;margin-top:16px;font:inherit;font-weight:800;font-size:1.1rem;padding:16px;border:0;border-radius:14px;background:var(--brand);color:#fff;cursor:pointer;text-align:center;text-decoration:none}
+.btn:hover{background:var(--brand2)}.btn:disabled{opacity:.6;cursor:default}
+.msg{color:#c0392b;min-height:1.3em;margin-top:8px;font-size:.95rem}
+.count{display:flex;gap:10px;justify-content:center;direction:ltr;margin:10px 0 4px}
+.count div{background:var(--soft);border-radius:12px;padding:8px 10px;min-width:64px;text-align:center}
+.count b{display:block;font-size:1.6rem;font-variant-numeric:tabular-nums}.count span{font-size:.75rem;color:var(--muted)}
+.small{font-size:.85rem;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.stats b{display:block;font-size:1.6rem;color:var(--brand)}
+.seen{max-width:100%;margin:18px auto 0;display:block;opacity:.85}
+img.photo{width:100%;border-radius:18px;display:block}
+ul.tick{list-style:none;padding:0;margin:0}
+ul.tick li{padding:10px 0 10px 0;border-bottom:1px solid var(--line)}
+ul.tick b.n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;margin-left:10px;font-size:.9rem}
+.quote{display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.quote img{width:64px;height:64px;border-radius:50%;object-fit:cover;flex:none}
+.quote q{display:block;font-weight:600}.quote small{color:var(--muted)}
+details{border-bottom:1px solid var(--line);padding:14px 0}summary{font-weight:700;cursor:pointer}
+details p{margin:8px 0 0;color:var(--muted)}
+footer{padding:28px 0 60px;text-align:center;color:var(--muted);font-size:.85rem}
+.thanks{display:none;text-align:center}
+.pulse{animation:p 2s infinite}@keyframes p{50%{box-shadow:0 0 0 8px rgba(124,58,237,.18)}}
+</style>
 </head>
 <body>
-<div class="wrap">
-  <span class="badge">דף הרשמה לדוגמה</span>
-  <h1>הרשמה לוובינר</h1>
-  <p class="muted">זה דף דוגמה. את יכולה לשלוח את אותו טופס מדף הנחיתה שלך (ראי README).</p>
-  <form id="f" class="card">
-    <label for="name">שם מלא</label><input id="name" required autocomplete="name">
-    <label for="email">אימייל</label><input id="email" type="email" required autocomplete="email" dir="ltr">
-    <label for="phone">טלפון (לוואטסאפ)</label><input id="phone" type="tel" autocomplete="tel" dir="ltr">
-    <label for="slot">מתי נוח לך?</label><select id="slot"></select>
-    <button class="btn-block" id="go" type="submit">הרשמה</button>
-    <div class="error" id="err"></div>
-  </form>
-</div>
+
+<header class="wrap" style="padding-top:26px;text-align:center">
+  <span class="eyebrow">וובינר בשידור חי · לבעלות עסקים שמוכרות ידע או שירות, ושכבר יש להן לקוחות וניסיון</span>
+  <h1>איך הפכתי עסק שהכניס <span class="num">11,000 ₪</span> בחודש לעסק שהכניס <span class="num">109,000 ₪</span> בחודש תוך <span class="num">90 יום</span> בעידן ה־AI</h1>
+  <p class="lead">בשידור אראה לך מה באמת השתנה בעסק שלי, ואיך גם את יכולה לבנות עסק שמייצר <b>6 ספרות כל חודש</b>, באופן יציב. בלי עוד כלי, בלי עוד קמפיין, וגם אם כבר ניסית כמעט הכול.</p>
+</header>
+
+<section id="top" style="padding-top:8px"><div class="wrap">
+  <div class="card" data-box>
+    <h3 style="text-align:center">שמרי לי מקום בשידור החי</h3>
+    <p class="small" style="text-align:center;margin:0">ללא עלות · מענה לשאלות בזמן אמת בשידור</p>
+    <p class="small" style="text-align:center;margin:14px 0 0">השידור הקרוב מתחיל בעוד</p>
+    <div class="count" data-count aria-live="off" style="visibility:hidden"><div><b data-d>00</b><span>ימים</span></div><div><b data-h>00</b><span>שעות</span></div><div><b data-m>00</b><span>דקות</span></div><div><b data-s>00</b><span>שניות</span></div></div>
+    <p class="small" style="text-align:center;margin:0" data-when></p>
+    <form data-form novalidate>
+      <label for="f-name">שם מלא</label><input id="f-name" name="name" type="text" autocomplete="name" required maxlength="80">
+      <label for="f-email">אימייל</label><input id="f-email" name="email" type="email" dir="ltr" autocomplete="email" inputmode="email" required maxlength="120" placeholder="name@example.com">
+      <label for="f-phone">טלפון (וואטסאפ)</label><input id="f-phone" name="phone" type="tel" dir="ltr" autocomplete="tel" inputmode="tel" required maxlength="20" placeholder="050-0000000">
+      <label class="consent"><input type="checkbox" name="consent" required><span>מאשרת קבלת הודעות ותזכורות על הוובינר, וניתן להסיר את ההסכמה בכל עת</span></label>
+      <button class="btn pulse" type="submit">כן, אני רוצה לשמור מקום ←</button>
+      <div class="msg" data-msg role="alert"></div>
+    </form>
+    <p class="small" style="text-align:center;margin:6px 0 0">ההרשמה מוגבלת ל־<b>200</b> המקומות הראשונים בשידור. אם לא עברת לדף הבא אחרי ההרשמה, זה אומר שנגמרו המקומות.</p>
+    <div class="thanks" data-thanks><h3>מעולה, את רשומה</h3><p>שמרנו לך מקום</p></div>
+  </div>
+  <img class="seen" src="assets/seen-on.ce7e462a.webp" alt="נראתה ב..." width="420" height="auto" loading="lazy">
+  <div class="stats" style="margin-top:22px"><div><b>500+</b><span class="small">בעלות עסקים שליווינו</span></div><div><b>12</b><span class="small">שנות ניסיון</span></div><div><b>30+</b><span class="small">מיליון ₪ שהלקוחות שלנו ייצרו</span></div></div>
+</div></section>
+
+<section style="background:#fff"><div class="wrap">
+  <span class="eyebrow">אולי זה מוכר לך</span>
+  <h2>מבחוץ העסק נראה בסדר. את יודעת שיש פער.</h2>
+  <img class="photo" src="assets/shir-frustrated.b625c639.webp" alt="" loading="lazy" style="margin:0 0 16px">
+  <p>״אני באמת ממש טובה במה שאני עושה.״<br>״אני הרבה מעבר למה שהעסק מייצר היום.״<br>״אני לא מוכנה שעוד שנתיים יעברו ככה.״</p>
+  <p>יש לקוחות, יש תוצאות, את משקיעה ועושה. ובסוף החודש את מסתכלת על המספר ושואלת: <b>זה הכול?</b> ואם היה חודש טוב, את כבר חושבת: איך אני מייצרת אותו שוב?</p>
+  <p>וכל פעם שמשהו בוער את מוסיפה עוד פתרון: עוד תוכן, עוד קמפיין, עוד תקציב, עוד אוטומציה. את משקיעה כסף, זמן ואנרגיה, ובסוף את לא בונה את העסק, את <b>מכבה בו שריפות</b>.</p>
+  <p>והיום, בעידן ה־AI, זה אפילו מסוכן יותר: קל יותר מאי פעם לכבות שריפות, אבל AI לא אומר לך אם זאת בכלל הבעיה שצריך לפתור.</p>
+  <h3>אני קוראת לזה אפקט החודש הטוב</h3>
+  <p><b>חודש טוב הוא לא תשתית.</b> העסק עבד, ואת לא יודעת למה, ולכן גם לא יודעת לשחזר.</p>
+  <p>יש דבר אחד שכל עוד הוא לא בנוי בעסק, עוד שנתיים יעברו ואת עדיין תהיי באותה נקודה. וזה מה שאגלה בשידור.</p>
+  <a class="btn" href="#top">כן, אני רוצה לשמור מקום ←</a>
+</div></section>
+
+<section><div class="wrap">
+  <h2>בשידור תצאי עם:</h2>
+  <ul class="tick">
+    <li><b class="n">1</b><b>איפה בדיוק העסק שלך תקוע</b> במקום עוד ניחושים, ועוד פתרון אחד שמכבה שריפה אחת</li>
+    <li><b class="n">2</b><b>ארבעת השינויים שהפכו עסק של 11,000 ₪ ל־109,000 ₪</b> ואיזה מהם דורש שינוי ראשון דווקא אצלך</li>
+    <li><b class="n">3</b><b>למה עוד שיווק לא פותר את זה</b> ומה כמעט כל הלקוחות שליווינו גילו בדרך</li>
+    <li><b class="n">4</b><b>תדעי בדיוק מה את צריכה לעשות</b> כדי להגיע ל־6 ספרות כל חודש, באופן יציב, עם העסק שלך. צעד ברור לעסק שלך, ולא עוד רשימה של מה לעשות</li>
+  </ul>
+  <p style="margin-top:14px">ובסוף השידור נענה לשאלות שלך בזמן אמת.</p>
+  <a class="btn" href="#top">כן, אני רוצה לשמור מקום ←</a>
+</div></section>
+
+<section style="background:#fff"><div class="wrap">
+  <h2>אל תקשיבי רק לי, תקשיבי להן</h2>
+  <p><b>חן, עורכת דין:</b> יעד חודש נובמבר היה 50 אלף ₪, ובסוף החודש: <span class="num">100,450 ₪</span>. מפחות מ־₪10,000 בחודש למעל ₪100,000 בחודש, תוך שלושה חודשים.</p>
+  <h3 style="margin-top:22px">ועוד כמה בעלות עסקים שעבדו איתנו</h3>
+  <div class="quote"><img src="assets/face-einat.67e453a5.jpg" alt="עינת" loading="lazy"><div><q>״20 שנה לא היה לי סיסטם, הכל היה באוויר״</q><small>עינת, מאמנת לזוגיות</small></div></div>
+  <div class="quote"><img src="assets/face-hila.7b091eef.jpg" alt="הילה בקשי" loading="lazy"><div><q>״5 שנים לא ישנתי בלילה, עכשיו יש לי דרך מסודרת וסיסטם שעובד״</q><small>הילה בקשי, מומחית לנטוורקינג</small></div></div>
+  <div class="quote"><img src="assets/face-sharon.28ed0de9.jpg" alt="שרון בג" loading="lazy"><div><q>״אנשים מבקשים אותי, הם מחכים לי, הם קובעים איתי פגישה״</q><small>שרון בג, בעלת עסק</small></div></div>
+  <div class="quote"><img src="assets/face-michal.f0324ecf.jpg" alt="מיכל" loading="lazy"><div><q>״יש לי עכשיו עסק יציב, והוא גדל, וזה נותן רוגע״</q><small>מיכל, בעלת עסק</small></div></div>
+  <div class="quote"><img src="assets/face-hodaya.90e133a0.jpg" alt="הודיה מלכה" loading="lazy"><div><q>״הייתי בהרבה ליווים, וזה התהליך הכי מוצלח והכי משתלם שהייתי בו, ואני עובדת איתו עד היום כבר שנים״</q><small>הודיה מלכה, נטורופתית</small></div></div>
+  <div class="quote"><img src="assets/face-keren.97e4af8f.jpg" alt="קרן מזור" loading="lazy"><div><q>״התוכנית הזו הגדילה לי את ההכנסות ב־30 אחוז, וכך אני יותר עובדת פחות ומרוויחה יותר״</q><small>קרן מזור, מאמנת לזוגיות</small></div></div>
+  <a class="btn" href="#top">כן, אני רוצה לשמור מקום ←</a>
+</div></section>
+
+<section><div class="wrap">
+  <h2>נעים להכיר, שיר יערי</h2>
+  <img class="photo" src="assets/shir-about2.b7127f06.jpg" alt="שיר יערי" loading="lazy" style="margin-bottom:16px">
+  <p><b>ידעתי מה אני מסוגלת לבנות, וההכנסות לא שיקפו את זה.</b> במשך שנים ההכנסות בעסק שלי היו רכבת הרים. ניסיתי למכור ליותר אנשים, לעבוד עם כולם, לעשות יותר שיווק ולהיות כל היום ברשתות. פגישות רבות לא היו עם האנשים הנכונים, ונכנסתי לשיחות מתישות עם לידים שלא התאימו לי.</p>
+  <p>ואז הכנסתי 4 שינויים בעסק, והם עשו את כל ההבדל. תוך 90 יום עברתי מכ־<span class="num">11</span> אלף ₪ בחודש ל־<span class="num">109</span> אלף ₪ בחודש.</p>
+  <p>12 שנים בתחום, ליווי של 500+ עסקים. הלקוחות שלנו ייצרו מעל 30 מיליון ₪. עבדנו כמעט בכל תחום: עורכות דין, מטפלות, מאמנות, יועצות ומעצבות.</p>
+</div></section>
+
+<section style="background:#fff"><div class="wrap">
+  <h2>השאלות שאת שואלת את עצמך</h2>
+  <details><summary>ניסיתי כמעט הכול ואני עדיין תקועה, זה מתאים לי?</summary><p>דווקא לכן. את כבר יודעת מה זה עוד קורס, עוד קמפיין ועוד כלי. הוובינר לא מוסיף עוד אחד לרשימה, הוא עוזר לראות מה באמת צריך להשתנות קודם בעסק שלך.</p></details>
+  <details><summary>כבר הייתי בליוויים אחרים</summary><p>אם בכל פעם תיקנת חלק אחר, פעם שיווק, פעם מכירות ופעם הצעה, ועדיין לא ברור איך לייצר הצלחה שוב, כנראה חסר מבט על העסק כולו. בוובינר נראה את ארבעת השינויים ואיך הם עובדים יחד.</p></details>
+  <details><summary>זה יעבוד גם בתחום שלי?</summary><p>עבדנו כמעט בכל תחום של ידע ושירות: עורכות דין, מטפלות, מאמנות, יועצות ומעצבות. אצל כל עסק חלק אחר דורש שינוי קודם, ואת זה נראה בשידור.</p></details>
+</div></section>
+
+<section><div class="wrap" style="text-align:center">
+  <h2>עוד פתרון שיווקי לא יקדם אותך. תשתית מדויקת כן.</h2>
+  <p class="lead">שמביאה 6 ספרות כל חודש, באופן יציב.<br>שמרי את המקום שלך, ובשידור תדעי איפה העסק שלך תקוע ומה המהלך הבא: ללא עלות, ובלי להתחייב לכלום.</p>
+  <a class="btn" href="#top">שמרי לי מקום בשידור החי</a>
+</div></section>
+
+<footer><div class="wrap">© שיר יערי · כל הזכויות שמורות</div></footer>
+
+<!-- Meta Pixel -->
 <script>
-const $ = (id) => document.getElementById(id);
-fetch("/api/slots").then(r => r.json()).then(({ slots, instantDelaySeconds }) => {
-  $("slot").innerHTML = `<option value="now">תכף, מתחילים עוד ${instantDelaySeconds} שניות</option>` +
-    slots.map(s => `<option value="${s.ms}">${s.label}</option>`).join("");
-});
-$("f").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  $("go").disabled = true; $("err").textContent = "";
-  try {
-    const slot = $("slot").value;
-    const r = await fetch("/api/register", {
-      method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name: $("name").value, email: $("email").value, phone: $("phone").value, slot: slot === "now" ? "now" : Number(slot) })
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error);
-    location.href = "/thanks.html?t=" + encodeURIComponent(d.token);
-  } catch (err) {
-    $("err").textContent = "משהו השתבש, נסי שוב (" + err.message + ")";
-    $("go").disabled = false;
-  }
-});
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
 </script>
+<script>
+// ===== הגדרות =====
+var CFG = {
+  api: "",                                         // ריק = אותו דומיין. אם הדף על דומיין אחר, כתובת החדר
+  thanksUrl: "https://shir-yaari.co.il/webinar-intro/", // אחרי ההרשמה (מקבל email ו-lead_id)
+  metaPixelId: "6955025104573942"
+};
+(function () {
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var q = new URLSearchParams(location.search);
+  var UTM = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "ref", "fbclid"];
+  function utm() { var o = {}; UTM.forEach(function (k) { var v = q.get(k); if (v) o[k] = v; }); return o; }
+  function newId() { var a = new Uint8Array(8); (window.crypto || {}).getRandomValues ? crypto.getRandomValues(a) : a.forEach(function (_, i) { a[i] = Math.random() * 256; }); return "lp" + Array.prototype.map.call(a, function (x) { return x.toString(16).padStart(2, "0"); }).join(""); }
+  function normPhone(v) { v = String(v || "").replace(/[^\d+]/g, ""); if (v.indexOf("+972") === 0) v = "0" + v.slice(4); else if (v.indexOf("972") === 0) v = "0" + v.slice(3); return v; }
+
+  if (CFG.metaPixelId) { fbq("init", CFG.metaPixelId); fbq("track", "PageView"); }
+
+  // ----- ספירה לאחור לסשן הקרוב -----
+  var target = 0;
+  function tick() {
+    var ms = target - Date.now();
+    if (!target) return;
+    if (ms <= 0) { load(); return; }
+    var s = Math.floor(ms / 1000), p = function (n) { return String(n).padStart(2, "0"); };
+    $("[data-d]").textContent = p(Math.floor(s / 86400));
+    $("[data-h]").textContent = p(Math.floor(s % 86400 / 3600));
+    $("[data-m]").textContent = p(Math.floor(s % 3600 / 60));
+    $("[data-s]").textContent = p(s % 60);
+  }
+  function load() {
+    fetch(CFG.api + "/api/slots").then(function (r) { return r.json(); }).then(function (d) {
+      if (d.slots && d.slots[0]) { target = d.slots[0].ms; $("[data-when]").textContent = d.slots[0].label; $("[data-count]").style.visibility = "visible"; tick(); }
+    }).catch(function () { $("[data-count]").style.display = "none"; });
+  }
+  load(); setInterval(tick, 1000);
+
+  // ----- הרשמה -----
+  var form = $("[data-form]"), msg = $("[data-msg]"), btn = $("button[type=submit]", form);
+  function err(t, el) { msg.textContent = t; if (el) el.focus(); }
+  form.addEventListener("submit", function (e) {
+    e.preventDefault(); msg.textContent = "";
+    var name = form.name.value.trim(), email = form.email.value.trim(), phone = normPhone(form.phone.value);
+    if (name.length < 2) return err("כתבי את השם שלך", form.name);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return err("בדקי את כתובת האימייל", form.email);
+    if (!/^0\d{8,9}$/.test(phone)) return err("בדקי את מספר הטלפון (למשל 050-1234567)", form.phone);
+    if (!form.consent.checked) return err("כדי להירשם צריך לאשר קבלת הודעות ותזכורות", form.consent);
+    var id = newId();
+    btn.disabled = true; btn.textContent = "שומרת מקום…";
+    fetch(CFG.api + "/api/register", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify(Object.assign({ name: name, email: email, phone: phone, event_id: id, slot: "next" }, utm()))
+    }).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || "error"); return d; }); })
+    .then(function (d) {
+      try { if (window.fbq) fbq("track", "Lead", {}, { eventID: d.id || id }); } catch (e) {}
+      var u = CFG.thanksUrl + (CFG.thanksUrl.indexOf("?") > -1 ? "&" : "?") + "email=" + encodeURIComponent(email) + "&lead_id=" + encodeURIComponent(d.id || id) + "&ref=landing";
+      setTimeout(function () { location.href = u; }, 350); // זמן קצר לשליחת הפיקסל
+    }).catch(function () {
+      btn.disabled = false; btn.textContent = "כן, אני רוצה לשמור מקום ←";
+      err("משהו השתבש בשמירת המקום. נסי שוב בעוד רגע.");
+    });
+  });
+})();
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=6955025104573942&ev=PageView&noscript=1" alt=""></noscript>
 </body>
 </html>
