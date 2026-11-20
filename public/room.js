@@ -20,7 +20,6 @@
   $("room").hidden = false;
   document.title = C.title;
   $("title").textContent = C.title;
-  $("badge").textContent = C.badge;
 
   const send = (event, data = {}, beacon = false) => {
     const payload = JSON.stringify({ t: token, event, data });
@@ -33,9 +32,11 @@
   const addMsg = (who, text, cls = "") => {
     const d = document.createElement("div");
     d.className = "msg " + cls;
+    const av = document.createElement("i"); av.className = "av"; av.textContent = (who || "?").trim().charAt(0);
+    const bd = document.createElement("div"); bd.className = "bd";
     const b = document.createElement("b"); b.textContent = who;
     const p = document.createElement("span"); p.textContent = text;
-    d.append(b, p); msgs.append(d); msgs.scrollTop = msgs.scrollHeight;
+    bd.append(b, p); d.append(av, bd); msgs.append(d); msgs.scrollTop = msgs.scrollHeight;
   };
   // צ'אט משידור קודם: נטען מקובץ, ומסומן בכותרת
   if (C.chatReplay && C.chatReplay.file) {
@@ -185,14 +186,15 @@
     if (!C.vimeoId && !C.youtubeId) return; // מצב בדיקה בלי וידאו
     const o = document.createElement("div");
     o.id = "unmute";
-    o.style.cssText = "position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.28);cursor:pointer";
+    o.style.cssText = "position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);cursor:pointer";
     const b = document.createElement("button");
-    b.textContent = "🔊 הקישי להפעלת קול";
-    b.style.cssText = "font:800 1.05rem/1 inherit;padding:14px 22px;border:0;border-radius:999px;background:linear-gradient(180deg,#f5e3a0,#d4af5a 55%,#9c7a2b);color:#17140b;cursor:pointer";
+    b.className = "unmute-btn";
+    b.textContent = "▶ הקישי להפעלת הוובינר, עם קול";
     o.append(b);
     o.addEventListener("click", () => {
-      try { if (ytPlayer) { ytPlayer.unMute(); ytPlayer.setVolume(100); } } catch {}
-      try { if (player) { player.setMuted(false); player.setVolume(1); } } catch {}
+      const t = Math.max(0, elapsed());
+      try { if (ytPlayer) { ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.seekTo(t, true); ytPlayer.playVideo(); } } catch {}
+      try { if (player) { player.setMuted(false); player.setVolume(1); player.setCurrentTime(t); player.play(); } } catch {}
       o.remove();
     });
     stage.append(o);
