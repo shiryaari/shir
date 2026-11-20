@@ -85,3 +85,16 @@ node scripts/import-chat.js chat.csv --first-names   # שם פרטי בלבד
 
 כניסה למסך הניהול: `https://הדומיין-שלך/host.html` ואז הסיסמה. הוא מציג את הסשן האחרון שיש בו הודעות, ומתעדכן כל 3 שניות. אפשר לכבות ב-`liveChat.enabled` ב-`webinar.config.js`.
 בלי חיבור אחסון, בפרודקשן הצ'אט החי לא פועל (והחדר ממשיך לעבוד עם שאר ההודעות).
+
+## שלושת ה-webhooks (כמו ב-Talexa)
+| webhook | מתי | אל מי |
+|---|---|---|
+| ליד נכנס (עם מקור הגעה, utm, event_id) | בהרשמה | `MAKE_REGISTRATION_WEBHOOK_URL` (הסנריו הקיים) |
+| הוובינר הסתיים (נרשמו, נכחו, המירו, סיכום) | 5 דקות אחרי שהסשן נגמר | `MAKE_ENDED_WEBHOOK_URL` (הסנריו "Integration Webhooks") |
+| צפו בהקלטה | כשנרשמת צופה בדף ההקלטה `/replay.html?t=...` | אותו webhook כמו "הסתיים" |
+
+המבנה זהה למה ש-Talexa שלחה (`webinar_id`, `session`, `registered`, `showed_up`, `converted`, `replay_viewers`, `summary`), ולכן הסנריו הקיים ב-Make ממשיך לעבוד בלי שינוי.
+כל נרשמת מקבלת בהרשמה גם `replay_url` (קישור אישי להקלטה). את שליחת ההקלטה בסוף השידור עושים ב-Make/ManyChat עם הקישור הזה.
+
+### הפעלת דוח סוף הסשן
+הדוח נשלח כשמישהו קורא ל-`GET /api/session-end?secret=<CRON_SECRET או HOST_SECRET>`. הכי פשוט: סנריו ב-Make שרץ כל 5 דקות ומבצע קריאת HTTP לכתובת הזאת. הקריאה בטוחה לחזרה (כל סשן מדווח פעם אחת). דורש חיבור אחסון (Upstash, ראי "צ'אט חי").

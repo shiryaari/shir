@@ -4,6 +4,7 @@ const { sign } = require("../lib/token");
 const { sendToMake } = require("../lib/make");
 const { isValidSlot, nextSlots } = require("../lib/slots");
 const { cors, body, siteUrl } = require("../lib/http");
+const store = require("../lib/store");
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -35,6 +36,7 @@ module.exports = async (req, res) => {
   const id = /^[A-Za-z0-9_-]{6,40}$/.test(String(b.event_id || "")) ? String(b.event_id) : crypto.randomBytes(6).toString("hex");
   const token = sign({ id, n: name, e: email, p: phone, s: start });
   const roomUrl = `${siteUrl(req)}/room.html?t=${token}`;
+  const replayUrl = `${siteUrl(req)}/replay.html?t=${token}`;
 
   const str = (v) => String(v || "").slice(0, 200);
   const utm = b.utm && typeof b.utm === "object" ? b.utm : {};
@@ -57,6 +59,7 @@ module.exports = async (req, res) => {
       full_name: name, name, email, phone,
       ...attribution,
       room_url: roomUrl,
+      replay_url: replayUrl,
       session_start: new Date(start).toISOString(),
       webinar: cfg.title,
     }, "registration");
@@ -74,6 +77,7 @@ module.exports = async (req, res) => {
       session_start: new Date(start).toISOString(),
       session_start_ms: start,
       room_url: roomUrl,
+      replay_url: replayUrl,
       webinar: cfg.title,
       ...attribution,
     }, "events");
@@ -81,5 +85,13 @@ module.exports = async (req, res) => {
     console.error(err); // לא חוסם את ההרשמה
   }
 
-  res.status(200).json({ ok: true, id, token, roomUrl, start });
+  // שמירת ההרשמה לדוח סוף הסשן (אם יש אחסון)
+  try {
+    if (store.available()) {
+      await store.zadd(`reg:${start}`, now, JSON.stringify({ rid: id, name, email, phone, registered_at: new Date(now).toISOString(), ...attribution }));
+      await store.zadd("sessions:all", start, String(start));
+    }
+  } catch (err) { console.error(err); }
+
+  res.status(200).json({ ok: true, id, token, roomUrl, replayUrl, start });
 };

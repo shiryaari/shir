@@ -5,7 +5,7 @@
   "description": "חדר וובינר אוטומטי: Vimeo + Make + ManyChat + רב מסר",
   "scripts": {
     "dev": "node dev-server.js",
-    "test": "node test/smoke.js && node test/landing.js && node test/cta.js && node test/replay.js && node test/live.js"
+    "test": "node test/smoke.js && node test/landing.js && node test/cta.js && node test/replay.js && node test/live.js && node test/report.js"
   },
   "engines": {
     "node": ">=18"
