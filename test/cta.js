@@ -14,7 +14,7 @@ const cfg = require("../webinar.config");
     const page = await browser.newPage();
     await page.route(/youtube|vimeo|facebook/, (r) => r.abort());
     await page.goto(`http://localhost:3115/room.html?t=${encodeURIComponent(t)}`);
-    await page.waitForSelector("#enter:not([hidden])", { timeout: 5000 });
+    await page.waitForFunction(() => !document.getElementById("cover"), null, { timeout: 40000 });
     await page.waitForTimeout(800);
     const visible = await page.evaluate(() => getComputedStyle(document.getElementById("cta")).display !== "none");
     assert.strictEqual(visible, expected, `minute ${minute}: cta visible=${visible}`);

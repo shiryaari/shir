@@ -134,7 +134,7 @@
   });
 
   // ---------- נגן ----------
-  let player = null, entered = false, watched = 0, lastTick = 0;
+  let player = null, ytPlayer = null, entered = false, watched = 0, lastTick = 0;
   const reported = new Set();
   const stage = $("stage");
 
@@ -145,11 +145,11 @@
       const sc = document.createElement("script"); sc.src = "https://www.youtube.com/iframe_api"; document.head.append(sc);
     });
     const holder = document.createElement("div"); holder.id = "ytp"; stage.append(holder);
-    const p = new YT.Player("ytp", {
+    const p = ytPlayer = new YT.Player("ytp", {
       videoId: C.youtubeId, width: "100%", height: "100%",
-      playerVars: { controls: 0, disablekb: 1, rel: 0, modestbranding: 1, playsinline: 1, autoplay: 1, start: Math.floor(target) },
+      playerVars: { controls: 0, disablekb: 1, rel: 0, modestbranding: 1, playsinline: 1, autoplay: 1, mute: 1, start: Math.floor(target) },
       events: {
-        onReady: (e) => { e.target.seekTo(target, true); e.target.playVideo(); },
+        onReady: (e) => { e.target.mute(); e.target.seekTo(target, true); e.target.playVideo(); },
         onStateChange: (e) => { if (e.data === YT.PlayerState.PAUSED && elapsed() < C.durationSeconds) e.target.playVideo(); },
       },
     });
@@ -171,7 +171,7 @@
     const [id, h] = C.vimeoId.split("/");
     const ifr = document.createElement("iframe");
     ifr.allow = "autoplay; fullscreen; picture-in-picture";
-    ifr.src = `https://player.vimeo.com/video/${id}?${h ? "h=" + h + "&" : ""}controls=0&autoplay=1&playsinline=1&title=0&byline=0&portrait=0&dnt=1`;
+    ifr.src = `https://player.vimeo.com/video/${id}?${h ? "h=" + h + "&" : ""}controls=0&autoplay=1&muted=1&playsinline=1&title=0&byline=0&portrait=0&dnt=1`;
     stage.append(ifr); stage.append(shield);
     player = new Vimeo.Player(ifr);
     await player.ready();
@@ -181,14 +181,33 @@
     player.on("timeupdate", (d) => { if (Math.abs(d.seconds - elapsed()) > 4) player.setCurrentTime(Math.max(0, elapsed())); });
   }
 
-  $("enter").addEventListener("click", async () => {
+  function addUnmuteOverlay() {
+    if (!C.vimeoId && !C.youtubeId) return; // מצב בדיקה בלי וידאו
+    const o = document.createElement("div");
+    o.id = "unmute";
+    o.style.cssText = "position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.28);cursor:pointer";
+    const b = document.createElement("button");
+    b.textContent = "🔊 הקישי להפעלת קול";
+    b.style.cssText = "font:800 1.05rem/1 inherit;padding:14px 22px;border:0;border-radius:999px;background:linear-gradient(180deg,#f5e3a0,#d4af5a 55%,#9c7a2b);color:#17140b;cursor:pointer";
+    o.append(b);
+    o.addEventListener("click", () => {
+      try { if (ytPlayer) { ytPlayer.unMute(); ytPlayer.setVolume(100); } } catch {}
+      try { if (player) { player.setMuted(false); player.setVolume(1); } } catch {}
+      o.remove();
+    });
+    stage.append(o);
+  }
+
+  // כניסה אוטומטית: הסשן כבר רץ, אז הצופה רואה מיד וובינר שמתנהל (הסרטון מתחיל בלי קול, ועליו כפתור להפעלת קול)
+  async function enterRoom() {
     if (entered) return;
     entered = true;
     $("cover").remove();
     lastTick = Date.now();
     send("joined", { joined_at_second: Math.round(Math.max(0, elapsed())) });
     await startVideo();
-  });
+    addUnmuteOverlay();
+  }
 
   // ---------- שעון ראשי ----------
   const fmt = (s) => {
@@ -201,10 +220,7 @@
     const e = elapsed();
     if (!entered && !ended) {
       if (e < 0) { $("count").textContent = fmt(-e); }
-      else if (e < C.durationSeconds) {
-        $("coverText").textContent = "הוובינר כבר התחיל";
-        $("count").hidden = true; $("enter").hidden = false;
-      }
+      else if (e < C.durationSeconds) { enterRoom(); }
     }
     if (e >= 0) tickChat();
     syncCta();

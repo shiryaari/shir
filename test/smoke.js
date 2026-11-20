@@ -38,8 +38,7 @@ const post = (p, b) => fetch(base + p, { method: "POST", headers: { "content-typ
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(reg.roomUrl.replace(/^https?:\/\/[^/]+/, base));
   await page.waitForFunction(() => /\d\d:\d\d/.test(document.getElementById("count").textContent), null, { timeout: 5000 });
-  await page.waitForSelector("#enter:not([hidden])", { timeout: 40000 });
-  await page.click("#enter");
+  await page.waitForFunction(() => !document.getElementById("cover"), null, { timeout: 40000 });
   await page.waitForFunction(() => document.querySelectorAll(".msg").length >= 2, null, { timeout: 30000 });
   const first = await page.textContent(".msg.host");
   assert(first.includes("דנה"), "personal name in chat: " + first);
