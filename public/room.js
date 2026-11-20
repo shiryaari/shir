@@ -151,7 +151,10 @@
       playerVars: { controls: 0, disablekb: 1, rel: 0, modestbranding: 1, playsinline: 1, autoplay: 1, mute: 1, start: Math.floor(target) },
       events: {
         onReady: (e) => { e.target.mute(); e.target.seekTo(target, true); e.target.playVideo(); },
-        onStateChange: (e) => { if (e.data === YT.PlayerState.PAUSED && elapsed() < C.durationSeconds) e.target.playVideo(); },
+        onStateChange: (e) => {
+          if (e.data === YT.PlayerState.PLAYING) onPlaying();
+          if (e.data === YT.PlayerState.PAUSED && elapsed() < C.durationSeconds) e.target.playVideo();
+        },
       },
     });
     setInterval(() => { // תיקון סטייה מול השעון, כמו שידור חי
@@ -178,26 +181,40 @@
     await player.ready();
     await player.setCurrentTime(target);
     player.play().catch(() => {});
+    player.on("play", () => onPlaying());
     player.on("pause", () => { if (elapsed() < C.durationSeconds) player.play().catch(() => {}); }); // כמו שידור חי
     player.on("timeupdate", (d) => { if (Math.abs(d.seconds - elapsed()) > 4) player.setCurrentTime(Math.max(0, elapsed())); });
   }
 
-  function addUnmuteOverlay() {
-    if (!C.vimeoId && !C.youtubeId) return; // מצב בדיקה בלי וידאו
+  // הפעלת קול: הסרטון מתחיל לבד בלי קול (הדפדפן מתיר רק כך). סמל קטן בפינה להפעלת קול,
+  // וכפתור גדול רק אם הדפדפן חסם גם הפעלה בלי קול.
+  let playing = false, soundOn = false, fallbackTimer = null;
+  function setPrompt(mode) { // "pill" | "big" | "none"
+    const old = document.getElementById("unmute"); if (old) old.remove();
+    if (mode === "none" || (!C.vimeoId && !C.youtubeId)) return;
     const o = document.createElement("div");
     o.id = "unmute";
-    o.style.cssText = "position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);cursor:pointer";
+    o.style.cssText = mode === "big"
+      ? "position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)"
+      : "position:absolute;z-index:3;bottom:12px;inset-inline-start:12px";
     const b = document.createElement("button");
     b.className = "unmute-btn";
-    b.textContent = "▶ הקישי להפעלת הוובינר, עם קול";
-    o.append(b);
-    o.addEventListener("click", () => {
+    b.textContent = mode === "big" ? "▶ הקישי להפעלת הוובינר" : "🔊 הפעלת קול";
+    if (mode === "pill") b.style.cssText = "font-size:.85rem;padding:8px 14px";
+    b.addEventListener("click", () => {
       const t = Math.max(0, elapsed());
+      soundOn = true;
       try { if (ytPlayer) { ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.seekTo(t, true); ytPlayer.playVideo(); } } catch {}
       try { if (player) { player.setMuted(false); player.setVolume(1); player.setCurrentTime(t); player.play(); } } catch {}
-      o.remove();
+      setPrompt("none");
     });
+    o.append(b);
     stage.append(o);
+  }
+  function onPlaying() { playing = true; if (!soundOn) setPrompt("pill"); }
+  function armFallback() { // אם אחרי כמה שניות הסרטון לא רץ, הדפדפן חסם: מציגים כפתור גדול
+    clearTimeout(fallbackTimer);
+    fallbackTimer = setTimeout(() => { if (!playing && !soundOn) setPrompt("big"); }, 4500);
   }
 
   // כניסה אוטומטית: הסשן כבר רץ, אז הצופה רואה מיד וובינר שמתנהל (הסרטון מתחיל בלי קול, ועליו כפתור להפעלת קול)
@@ -208,7 +225,7 @@
     lastTick = Date.now();
     send("joined", { joined_at_second: Math.round(Math.max(0, elapsed())) });
     await startVideo();
-    addUnmuteOverlay();
+    armFallback();
   }
 
   // ---------- שעון ראשי ----------
