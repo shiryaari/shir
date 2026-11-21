@@ -1,12 +1,15 @@
 (async () => {
   const $ = (id) => document.getElementById(id);
-  const token = new URLSearchParams(location.search).get("t");
+  const params = new URLSearchParams(location.search);
+  const token = params.get("t");
+  const preview = params.get("preview");
   const bad = () => { $("bad").hidden = false; };
-  if (!token) return bad();
+  if (!token && !preview) return bad();
 
   let S;
   try {
-    const r = await fetch("/api/session?t=" + encodeURIComponent(token));
+    const query = token ? { t: token } : { preview };
+    const r = await fetch("/api/session?" + new URLSearchParams(query));
     if (!r.ok) return bad();
     S = await r.json();
   } catch { return bad(); }
@@ -20,8 +23,14 @@
   $("room").hidden = false;
   document.title = C.title;
   $("title").textContent = C.title;
+  if (S.preview) {
+    $("previewBadge").hidden = false;
+    $("form").hidden = true;
+    $("ctaBtn").disabled = true;
+  }
 
   const send = (event, data = {}, beacon = false) => {
+    if (S.preview) return;
     const payload = JSON.stringify({ t: token, event, data });
     if (beacon && navigator.sendBeacon) return navigator.sendBeacon("/api/event", new Blob([payload], { type: "text/plain" }));
     return fetch("/api/event", { method: "POST", headers: { "content-type": "application/json" }, body: payload, keepalive: true }).catch(() => {});
@@ -121,6 +130,7 @@
 
   $("form").addEventListener("submit", async (ev) => {
     ev.preventDefault();
+    if (S.preview) return;
     const text = $("text").value.trim(); if (!text) return;
     $("text").value = "";
     let sentLive = false;
@@ -166,6 +176,7 @@
     $("cta").style.display = "block";
   };
   $("ctaBtn").addEventListener("click", () => {
+    if (S.preview) return;
     send("questionnaire_opened");
     if (C.questionnaire.embed) { frameLoads = 0; $("qframe").src = qUrl(); $("modal").classList.add("open"); }
     else window.open(qUrl(), "_blank", "noopener");

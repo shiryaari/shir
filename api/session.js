@@ -5,7 +5,13 @@ const { cors } = require("../lib/http");
 // מחזיר לחדר את פרטי הנרשמת והתצורה הציבורית. הכול מאומת לפי הטוקן.
 module.exports = async (req, res) => {
   if (cors(req, res)) return;
-  const s = verify(req.query && req.query.t);
+  const { t, preview } = req.query || {};
+  const previewAt = preview === "questionnaire" ? 30 * 60 + 50
+    : preview === "testimonials" ? 56 * 60 + 15 : null;
+  const now = Date.now();
+  const s = previewAt === null
+    ? verify(t)
+    : { n: "צופה לדוגמה", s: now - previewAt * 1000 };
   if (!s) return res.status(401).json({ error: "bad_token" });
 
   const first = s.n.split(" ")[0];
@@ -17,7 +23,8 @@ module.exports = async (req, res) => {
     phone: s.p,
     id: s.id,
     start: s.s,
-    serverNow: Date.now(),
+    serverNow: now,
+    preview: previewAt !== null,
     config: {
       title: cfg.title,
       hostName: cfg.hostName,
@@ -27,7 +34,7 @@ module.exports = async (req, res) => {
       durationSeconds: cfg.durationSeconds,
       chat: cfg.chat,
       chatReplay: cfg.chatReplay,
-      liveChat: cfg.liveChat,
+      liveChat: previewAt === null ? cfg.liveChat : { enabled: false },
       replies: cfg.replies,
       questionnaire: cfg.questionnaire,
       roomActivity: cfg.roomActivity,
