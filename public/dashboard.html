@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>דשבורד וובינר</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<style>
+.dash{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.top h1{margin:0}
+.nav a{color:var(--gold-hi);margin-inline-start:14px;font-size:.9rem}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+@media(min-width:760px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:linear-gradient(180deg,#141418,#0b0b0e);border:1px solid var(--line);border-radius:16px;padding:14px}
+.kpi small{display:block;color:var(--muted);font-size:.8rem}
+.kpi b{display:block;font-family:var(--serif);font-size:1.9rem;color:var(--gold-hi);line-height:1.15;margin-top:2px}
+.kpi span{color:var(--muted);font-size:.78rem}
+h2{font-family:var(--serif);font-size:1.25rem;margin:22px 0 10px;color:var(--gold-hi)}
+.bar{height:8px;border-radius:99px;background:#1b1b20;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi))}
+.sess{background:linear-gradient(180deg,#141418,#0b0b0e);border:1px solid var(--line);border-radius:16px;margin-bottom:10px;overflow:hidden}
+.sess>summary{list-style:none;cursor:pointer;padding:14px;display:grid;gap:8px}
+.sess>summary::-webkit-details-marker{display:none}
+.sh{display:flex;justify-content:space-between;gap:8px;font-weight:700}
+.sh em{font-style:normal;color:var(--muted);font-weight:400;font-size:.85rem}
+.mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.mini div{background:#0a0a0c;border:1px solid var(--line);border-radius:10px;padding:6px 2px}
+.mini b{display:block;color:var(--gold-hi);font-size:1.1rem}.mini span{font-size:.7rem;color:var(--muted)}
+.tw{overflow:auto;border-top:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:640px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid rgba(212,175,90,.12);white-space:nowrap}
+th{color:var(--gold-hi);font-weight:700;position:sticky;top:0;background:#0d0d10}
+.ok{color:#9be29b}.no{color:#a9a9b0}.gold{color:var(--gold-hi)}
+.empty{color:var(--muted);padding:30px 0;text-align:center}
+.exp{margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="wrap" id="login" style="padding-top:60px">
+  <div class="card">
+    <h1>דשבורד</h1>
+    <p class="muted">הקלידי את סיסמת הניהול.</p>
+    <form id="lf"><input id="secret" type="password" placeholder="סיסמה" autocomplete="current-password"><button class="btn-block">כניסה</button></form>
+    <div class="error" id="lerr"></div>
+  </div>
+</div>
+<div class="dash" id="dash" hidden>
+  <div class="top">
+    <h1>דשבורד וובינר</h1>
+    <div class="nav"><a href="/host.html">צ'אט חי</a><a href="#" id="refresh">רענון</a><a href="#" id="csv">הורדת CSV</a></div>
+  </div>
+  <div class="small" id="sub" style="margin-bottom:12px"></div>
+  <div class="kpis" id="kpis"></div>
+  <h2>לפי סשן</h2>
+  <div id="sessions"></div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+let secret = "", data = null;
+try { secret = localStorage.getItem("hostSecret") || ""; } catch {}
+const fmtDate = (ms) => new Intl.DateTimeFormat("he-IL", { weekday: "long", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jerusalem" }).format(ms);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const kpi = (label, val, sub, pct) => `<div class="kpi"><small>${label}</small><b>${val}</b>${sub ? `<span>${sub}</span>` : ""}${pct != null ? `<div class="bar"><i style="width:${Math.min(100, pct)}%"></i></div>` : ""}</div>`;
+
+function render() {
+  const t = data.totals;
+  $("sub").textContent = `${data.webinar} · ${data.duration_min} דקות · ${t.sessions} סשנים`;
+  $("kpis").innerHTML =
+    kpi("נרשמו", t.registered, `${t.sessions} סשנים`) +
+    kpi("נכחו", t.attended, `${t.attendance_pct}% מהנרשמות`, t.attendance_pct) +
+    kpi("זמן צפייה ממוצע", t.avg_watch_min + " דק׳", `${t.avg_pct}% מהוובינר`, t.avg_pct) +
+    kpi("מילאו שאלון", t.submitted, `${t.submit_pct}% מהנוכחות · פתחו: ${t.opened}`, t.submit_pct) +
+    kpi("הודעות בצ'אט", t.chat_messages, "שנכתבו בחדר") +
+    kpi("צפו בהקלטה", t.replay_viewers, "") ;
+  if (!data.sessions.length) { $("sessions").innerHTML = '<div class="empty">עוד אין נתונים. הם יופיעו אחרי ההרשמה הראשונה.</div>'; return; }
+  $("sessions").innerHTML = data.sessions.map((s, i) => `
+    <details class="sess" ${i === 0 ? "open" : ""}>
+      <summary>
+        <div class="sh"><span>${fmtDate(s.start)}</span><em>${s.registered} נרשמו · ${s.attended} נכחו</em></div>
+        <div class="mini">
+          <div><b>${s.attendance_pct}%</b><span>נוכחות</span></div>
+          <div><b>${s.avg_watch_min}</b><span>דק׳ צפייה</span></div>
+          <div><b>${s.submitted}</b><span>שאלון</span></div>
+          <div><b>${s.chat_messages}</b><span>צ'אט</span></div>
+        </div>
+      </summary>
+      <div class="tw"><table>
+        <tr><th>שם</th><th>מייל</th><th>טלפון</th><th>נכחה</th><th>צפייה (דק׳)</th><th>%</th><th>שאלון</th><th>צ'אט</th><th>הקלטה (דק׳)</th><th>מקור</th></tr>
+        ${s.people.map((p) => `<tr>
+          <td class="gold">${esc(p.name)}</td><td dir="ltr">${esc(p.email)}</td><td dir="ltr">${esc(p.phone)}</td>
+          <td class="${p.attended ? "ok" : "no"}">${p.attended ? "כן" : "לא"}</td>
+          <td>${p.watch_min}</td><td>${p.pct}%</td>
+          <td class="${p.submitted ? "ok" : p.opened ? "gold" : "no"}">${p.submitted ? "מילאה" : p.opened ? "פתחה" : "לא"}</td>
+          <td>${p.chat}</td><td>${p.replay_min || "-"}</td><td>${esc(p.source) || "-"}</td></tr>`).join("") || `<tr><td colspan="10" class="muted">אין נרשמות בסשן הזה</td></tr>`}
+      </table></div>
+    </details>`).join("");
+}
+
+async function load() {
+  const r = await fetch(`/api/dashboard?secret=${encodeURIComponent(secret)}`, { cache: "no-store" });
+  if (r.status === 401) { try { localStorage.removeItem("hostSecret"); } catch {} $("login").hidden = false; $("dash").hidden = true; $("lerr").textContent = "סיסמה שגויה"; return; }
+  if (r.status === 503) { $("login").hidden = false; $("lerr").textContent = "המערכת עוד לא מוגדרת (אחסון או סיסמת ניהול)"; return; }
+  data = await r.json();
+  $("login").hidden = true; $("dash").hidden = false;
+  render();
+}
+$("lf").addEventListener("submit", (e) => { e.preventDefault(); secret = $("secret").value; try { localStorage.setItem("hostSecret", secret); } catch {} load(); });
+$("refresh").addEventListener("click", (e) => { e.preventDefault(); load(); });
+$("csv").addEventListener("click", (e) => {
+  e.preventDefault(); if (!data) return;
+  const rows = [["סשן", "שם", "מייל", "טלפון", "נכחה", "דקות צפייה", "אחוז צפייה", "שאלון", "הודעות צ'אט", "דקות הקלטה", "מקור"]];
+  data.sessions.forEach((s) => s.people.forEach((p) => rows.push([new Date(s.start).toISOString(), p.name, p.email, p.phone, p.attended ? "כן" : "לא", p.watch_min, p.pct, p.submitted ? "מילאה" : p.opened ? "פתחה" : "לא", p.chat, p.replay_min, p.source])));
+  const csv = "﻿" + rows.map((r) => r.map((c) => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = "webinar.csv"; a.click();
+});
+if (secret) load();
+setInterval(() => { if (!$("dash").hidden && !document.hidden) load(); }, 30000);
+</script>
+</body>
+</html>
