@@ -208,7 +208,8 @@
     ifr.allow = "autoplay; fullscreen; picture-in-picture";
     ifr.src = `https://player.vimeo.com/video/${id}?${h ? "h=" + h + "&" : ""}controls=0&autoplay=1&muted=1&playsinline=1&title=0&byline=0&portrait=0&dnt=1`;
     stage.append(ifr); stage.append(shield);
-    player = new Vimeo.Player(ifr);
+    if (!window.Vimeo?.Player) return;
+    player = new window.Vimeo.Player(ifr);
     await player.ready();
     await player.setCurrentTime(target);
     player.play().catch(() => {});
