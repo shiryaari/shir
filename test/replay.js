@@ -1,4 +1,4 @@
-// בדיקת צ'אט מקובץ: הודעה מהקובץ מופיעה, ובלי תווית בכותרת כברירת מחדל. הקובץ מוחזר לריק בסוף.
+// בדיקת צ'אט מקובץ מול מיקום הניגון ב-Vimeo, בלי תלות ברשת.
 process.env.SIGNING_SECRET = "test-secret";
 process.env.PORT = "3116";
 const fs = require("fs");
@@ -15,10 +15,22 @@ const { sign } = require("../lib/token");
     const browser = await chromium.launch();
     const t = sign({ id: "rp1", n: "דנה כהן", e: "dana@example.com", p: "0501234567", s: Date.now() - 10000 });
     const page = await browser.newPage();
-    await page.route(/youtube|vimeo|facebook/, (r) => r.abort());
+    await page.route("https://player.vimeo.com/api/player.js", (route) => route.fulfill({
+      contentType: "application/javascript",
+      body: `window.Vimeo = { Player: class {
+        async ready() {}
+        async setCurrentTime() {}
+        async play() {}
+        on(event, callback) { if (event === "timeupdate") window.setVideoPosition = callback; }
+      } };`,
+    }));
+    await page.route("https://player.vimeo.com/video/**", (route) => route.abort());
     await page.goto(`http://localhost:3116/room.html?t=${encodeURIComponent(t)}`);
     await page.waitForFunction(() => !document.getElementById("cover"), null, { timeout: 40000 });
-    await page.waitForFunction(() => [...document.querySelectorAll(".msg")].some((m) => m.textContent.includes("היי שיר")), null, { timeout: 5000 });
+    await page.waitForFunction(() => typeof window.setVideoPosition === "function");
+    assert.strictEqual(await page.getByText("היי שיר", { exact: true }).count(), 0);
+    await page.evaluate(() => window.setVideoPosition({ seconds: 10 }));
+    await page.getByText("היי שיר", { exact: true }).waitFor({ timeout: 5000 });
     assert.strictEqual((await page.textContent("#replayLabel")).trim(), "", "no label by default");
     await browser.close();
     console.log("replay ok");
