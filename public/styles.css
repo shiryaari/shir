@@ -115,3 +115,9 @@ button:disabled{opacity:.5;cursor:default}
 .room-lobby-content{max-width:68%;color:var(--text)}
 .room-lobby-host{margin:0 0 6px;font-family:var(--serif);font-size:clamp(1rem,2.2vw,1.6rem);color:var(--gold-hi)}
 .room-lobby .count{width:max-content;margin-top:6px;font-size:clamp(1.9rem,5vw,4.4rem);line-height:1.1}
+
+.webinar-room .room-main{position:relative}
+.webinar-room .cta-overlay{position:absolute;inset-block-start:10px;inset-inline-start:10px;z-index:5;width:min(340px, calc(100% - 20px));margin:0;padding:12px 28px 12px 14px;background:#1a1510f5;text-align:start;box-shadow:0 8px 24px #0007}
+.cta-overlay #ctaDesc{font-size:.84rem}
+.cta-overlay #ctaBtn{font-size:.85rem;padding:7px 14px}
+.cta-dismiss{position:absolute;inset-block-start:5px;inset-inline-start:5px;padding:0 5px;background:none;color:var(--gold-hi);font-size:1.15rem;box-shadow:none}

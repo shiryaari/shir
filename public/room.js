@@ -132,12 +132,17 @@
     .replaceAll("{phone}", encodeURIComponent(S.phone || ""))
     .replaceAll("{id}", encodeURIComponent(S.id));
   let qDone = false, activeCta = -1;
+  const questionnaireCard = $("cta");
+  const dismissCta = $("ctaDismiss");
+  dismissCta.addEventListener("click", () => { questionnaireCard.style.display = "none"; });
   const syncCta = (e) => {
     const i = qDone ? -1 : C.questionnaire.ctas.findIndex((c) => e >= c.at && e < c.at + c.durationSeconds);
     if (i === activeCta) return;
     activeCta = i;
     if (i < 0) { $("cta").style.display = "none"; return; }
     const c = C.questionnaire.ctas[i];
+    questionnaireCard.classList.toggle("cta-overlay", Boolean(c.overlay));
+    dismissCta.hidden = !c.overlay;
     $("ctaTitle").textContent = fill(c.title);
     $("ctaDesc").textContent = fill(c.description || "");
     $("ctaBtn").textContent = c.buttonText;

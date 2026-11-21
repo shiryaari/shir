@@ -112,7 +112,7 @@ module.exports = {
     embed: true,      // true = נפתח בחלון בתוך החדר, false = נפתח בלשונית חדשה
     ctas: [
       { at: 30 * 60 + 20, durationSeconds: 300, // 30:20 ל-5 דקות
-        activityNoticeOffsets: [20],
+        overlay: true,
         title: "לשאלון התאמה לפגישת פיצוח",
         description: "נמפה את העסק שלך ונבין ביחד מה השלב הבא בדרך ליציבות ויעדים שאת חולמת עליהם",
         buttonText: "לשאלון התאמה" },
