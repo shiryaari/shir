@@ -39,21 +39,24 @@
     bd.append(b, p); d.append(av, bd); msgs.append(d); msgs.scrollTop = msgs.scrollHeight;
   };
   // צ'אט משידור קודם: נטען מקובץ, ומסומן בכותרת
+  let replayChat = [];
+  let vimeoPosition = null;
   if (C.chatReplay && C.chatReplay.file) {
     try {
       const rr = await fetch(C.chatReplay.file, { cache: "no-store" });
       const list = rr.ok ? await rr.json() : [];
       if (Array.isArray(list) && list.length) {
-        C.chat = C.chat.concat(list.map((m) => ({ at: Number(m.at) || 0, from: String(m.name || ""), text: String(m.text || "") })));
+        replayChat = list.map((m) => ({ at: Number(m.at) || 0, from: String(m.name || ""), text: String(m.text || ""), replay: true }));
         if (C.chatReplay.label) $("replayLabel").textContent = "· " + C.chatReplay.label;
       }
     } catch {}
   }
+  const chatSchedule = C.chat.concat(replayChat).sort((a, b) => a.at - b.at);
   const shown = new Set();
-  const tickChat = () => {
-    const e = elapsed();
-    C.chat.forEach((m, i) => {
-      if (m.at <= e && !shown.has(i)) {
+  const tickChat = (e) => {
+    chatSchedule.forEach((m, i) => {
+      const position = m.replay && C.vimeoId ? vimeoPosition : e;
+      if (position !== null && m.at <= position && !shown.has(i)) {
         shown.add(i);
         const isHost = m.from === "host" || m.from === C.hostName;
         addMsg(isHost ? C.hostName : m.from, fill(m.text), isHost ? "host" : "");
@@ -211,7 +214,10 @@
     player.play().catch(() => {});
     player.on("play", () => onPlaying());
     player.on("pause", () => { if (elapsed() < C.durationSeconds) player.play().catch(() => {}); }); // כמו שידור חי
-    player.on("timeupdate", (d) => { if (Math.abs(d.seconds - elapsed()) > 4) player.setCurrentTime(Math.max(0, elapsed())); });
+    player.on("timeupdate", ({ seconds }) => {
+      vimeoPosition = seconds;
+      if (Math.abs(seconds - elapsed()) > 4) player.setCurrentTime(Math.max(0, elapsed())).catch(() => {});
+    });
   }
 
   // הפעלת קול: הסרטון מתחיל לבד בלי קול (הדפדפן מתיר רק כך). סמל קטן בפינה להפעלת קול,
@@ -269,7 +275,7 @@
       if (e < 0) { $("count").textContent = fmt(-e); }
       else if (e < C.durationSeconds) { enterRoom(); }
     }
-    if (e >= 0) tickChat();
+    if (e >= 0) tickChat(e);
     syncCta(e);
     syncRoomActivity(e);
 
