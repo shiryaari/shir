@@ -74,9 +74,13 @@ button:disabled{opacity:.5;cursor:default}
 .webinar-room .room-viewers{margin:0;color:var(--muted);font-size:.78rem;white-space:nowrap}
 .room-main{min-width:0}
 .webinar-room .stage{border-radius:12px;border-color:#303036;box-shadow:none}
-.stage-message{position:absolute;z-index:4;inset-inline-end:12px;bottom:12px;max-width:min(70%,360px);display:grid;gap:2px;padding:8px 12px;background:rgba(14,14,17,.94);border:1px solid #4e4533;border-inline-start:3px solid var(--gold);border-radius:8px;pointer-events:none;overflow-wrap:anywhere;line-height:1.35}
-.stage-message b{color:var(--gold-hi);font-size:.7rem}
-.stage-message span{font-size:.82rem;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.stage-message{position:absolute;z-index:4;inset-inline-end:14px;bottom:14px;max-width:min(62%,360px);display:flex;align-items:center;gap:8px;padding:5px 8px 5px 12px;background:rgba(17,15,13,.91);border:1px solid rgba(212,175,90,.35);border-radius:999px;box-shadow:0 4px 14px #0005;pointer-events:none;line-height:1.25;animation:stage-message-in .2s ease-out}
+.stage-message-initial{display:grid;place-items:center;flex:0 0 25px;height:25px;border-radius:50%;background:#dfc184;color:#231b10;font-size:.72rem;font-weight:800}
+.stage-message-copy{min-width:0;display:flex;gap:5px;align-items:baseline}
+.stage-message-copy b{flex:none;max-width:9ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--gold-hi);font-size:.72rem}
+.stage-message-copy span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.79rem}
+@keyframes stage-message-in{from{opacity:0;transform:translateY(5px)}}
+@media(prefers-reduced-motion:reduce){.stage-message{animation:none}}
 .webinar-room .chat{border-color:#2e2e34;border-radius:12px;background:#111114}
 .webinar-room .chat-head{color:var(--text);border-color:#2e2e34;font:700 .92rem var(--sans)}
 .webinar-room .msgs{gap:12px}
@@ -91,7 +95,9 @@ button:disabled{opacity:.5;cursor:default}
 .webinar-room .cta-activity span:not([hidden]){display:inline-flex;align-items:center;gap:7px;padding:5px 9px;border-radius:6px;background:#302719}
 .webinar-room .cta-activity span:not([hidden])::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold)}
 @media(min-width:900px){
-  .webinar-room{grid-template-columns:minmax(0,1fr) clamp(260px,27vw,340px)}
+  .webinar-room{grid-template-columns:clamp(260px,27vw,340px) minmax(0,1fr)}
+  .webinar-room .room-main{grid-area:2 / 2}
+  .webinar-room .chat{grid-area:2 / 1}
   .webinar-room .chat{height:clamp(360px,calc((100vw - 360px) * .5625),615px);min-height:0;max-height:none}
 }
 @media(max-width:899px){
@@ -100,8 +106,9 @@ button:disabled{opacity:.5;cursor:default}
 @media(max-width:540px){
   .webinar-room{padding:10px}
   .webinar-room .room-title{grid-template-columns:1fr;gap:7px}
-  .stage-message{inset-inline-end:7px;bottom:7px;max-width:62%;padding:5px 8px}
-  .stage-message span{font-size:.72rem}
+  .stage-message{inset-inline-end:7px;bottom:7px;max-width:62%;padding:4px 6px 4px 9px}
+  .stage-message-initial{flex-basis:20px;height:20px}
+  .stage-message-copy span{font-size:.72rem}
 }
 
 .webinar-room .room-lobby{align-items:stretch;justify-content:center;background:linear-gradient(270deg,#17130d 27%,rgba(23,19,13,.88) 48%,rgba(23,19,13,.2) 100%),#17130d url("/assets/shir-about2.b7127f06.jpg") left 38% / auto 100% no-repeat;text-align:start;padding:clamp(16px,5vw,72px)}

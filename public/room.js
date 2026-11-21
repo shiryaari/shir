@@ -33,6 +33,7 @@
   let stageMessageUntil = 0;
   function showStageMessage(who, text) {
     if (now() < stageMessageUntil) return;
+    $("stageMessageInitial").textContent = who.trim().charAt(0) || "•";
     $("stageMessageName").textContent = who;
     $("stageMessageText").textContent = text;
     stageMessage.hidden = false;
