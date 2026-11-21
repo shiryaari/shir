@@ -45,6 +45,15 @@ const base = "http://localhost:3120";
     await page.waitForSelector("#dash:not([hidden])", { timeout: 5000 });
     await page.waitForFunction(() => document.getElementById("kpis").textContent.includes("67%"), null, { timeout: 5000 });
     assert((await page.textContent("#sessions")).includes("דנה כהן"));
+    await page.click('#tabs button[data-tab="contacts"]');
+    await page.waitForFunction(() => document.getElementById("ctable").textContent.includes("dana@example.com"), null, { timeout: 5000 });
+    await page.fill("#q", "michal");
+    await page.waitForFunction(() => !document.getElementById("ctable").textContent.includes("dana@example.com") && document.getElementById("ctable").textContent.includes("michal@example.com"), null, { timeout: 5000 });
+    assert.match(await page.textContent("#ccount"), /^1 /);
+    await page.fill("#q", ""); await page.selectOption("#fAtt", "n");
+    await page.waitForFunction(() => document.getElementById("ctable").textContent.includes("ronit@example.com") && !document.getElementById("ctable").textContent.includes("dana@example.com"), null, { timeout: 5000 });
+    await page.click('#tabs button[data-tab="analytics"]');
+    await page.waitForFunction(() => document.getElementById("chAtt").textContent.includes("67%"), null, { timeout: 5000 });
     await b.close();
     console.log("dashboard ok");
   } finally { server.close(); }

@@ -36,6 +36,20 @@ th{color:var(--gold-hi);font-weight:700;position:sticky;top:0;background:#0d0d10
 .ok{color:#9be29b}.no{color:#a9a9b0}.gold{color:var(--gold-hi)}
 .empty{color:var(--muted);padding:30px 0;text-align:center}
 .exp{margin-bottom:6px}
+.tabs{display:flex;gap:6px;background:#0d0d10;border:1px solid var(--line);border-radius:999px;padding:4px;margin-bottom:16px;width:fit-content;max-width:100%;overflow:auto}
+.tabs button{background:transparent;color:var(--muted);box-shadow:none;padding:8px 18px;font-weight:700}
+.tabs button.on{background:linear-gradient(180deg,var(--gold-hi),var(--gold) 55%,var(--gold-lo));color:var(--dark)}
+.filters{display:grid;gap:8px;grid-template-columns:1fr 1fr;margin:12px 0}
+.filters input{grid-column:1/-1}
+.filters select{padding:10px;border-radius:12px}
+@media(min-width:760px){.filters{grid-template-columns:2fr 1.3fr 1fr 1fr 1fr}.filters input{grid-column:auto}}
+.cnt{color:var(--muted);font-size:.85rem;margin:6px 0}
+.chart{background:linear-gradient(180deg,#141418,#0b0b0e);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
+.chart h3{margin:0 0 10px;font-family:var(--serif);color:var(--gold-hi);font-size:1.05rem}
+.row{display:grid;grid-template-columns:110px 1fr 56px;align-items:center;gap:8px;margin:7px 0;font-size:.85rem}
+.row .tr{height:18px;background:#1b1b20;border-radius:6px;overflow:hidden}
+.row .tr i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi))}
+.row b{color:var(--gold-hi);text-align:left;direction:ltr}
 </style>
 </head>
 <body>
@@ -53,9 +67,33 @@ th{color:var(--gold-hi);font-weight:700;position:sticky;top:0;background:#0d0d10
     <div class="nav"><a href="/host.html">צ'אט חי</a><a href="#" id="refresh">רענון</a><a href="#" id="csv">הורדת CSV</a></div>
   </div>
   <div class="small" id="sub" style="margin-bottom:12px"></div>
-  <div class="kpis" id="kpis"></div>
-  <h2>לפי סשן</h2>
-  <div id="sessions"></div>
+  <div class="tabs" id="tabs"><button data-tab="overview" class="on">סקירה</button><button data-tab="contacts">אנשי קשר</button><button data-tab="analytics">אנליטיקס</button></div>
+
+  <section id="t-overview">
+    <div class="kpis" id="kpis"></div>
+    <h2>לפי סשן</h2>
+    <div id="sessions"></div>
+  </section>
+
+  <section id="t-contacts" hidden>
+    <div class="kpis" id="ckpis"></div>
+    <div class="filters">
+      <input id="q" placeholder="חיפוש לפי שם, מייל, טלפון או מקור..." autocomplete="off">
+      <select id="fSession"><option value="">כל הסשנים</option></select>
+      <select id="fAtt"><option value="">כל הנוכחות</option><option value="y">הגיעו</option><option value="n">לא הגיעו</option></select>
+      <select id="fQ"><option value="">כל השאלונים</option><option value="done">מילאו</option><option value="open">פתחו ולא מילאו</option><option value="none">לא פתחו</option></select>
+      <select id="fSort"><option value="new">הרשמה: החדשים קודם</option><option value="old">הרשמה: הישנים קודם</option><option value="watch">זמן צפייה: הגבוה קודם</option></select>
+    </div>
+    <div class="cnt" id="ccount"></div>
+    <div class="tw" style="border:1px solid var(--line);border-radius:14px"><table id="ctable"></table></div>
+  </section>
+
+  <section id="t-analytics" hidden>
+    <div class="chart"><h3>נרשמו ונכחו לפי סשן</h3><div id="chViewers"></div></div>
+    <div class="chart"><h3>אחוז נוכחות לפי סשן</h3><div id="chAtt"></div></div>
+    <div class="chart"><h3>שיעור המרה (מילאו שאלון מתוך מי שנכחה)</h3><div id="chConv"></div></div>
+    <div class="chart"><h3>זמן צפייה ממוצע (דקות)</h3><div id="chWatch"></div></div>
+  </section>
 </div>
 <script>
 const $ = (id) => document.getElementById(id);
@@ -99,13 +137,51 @@ function render() {
     </details>`).join("");
 }
 
+let tab = "overview";
+const people = () => data.sessions.flatMap((s) => s.people.map((p) => ({ ...p, start: s.start })));
+const bar = (label, val, max, text) => `<div class="row"><span>${esc(label)}</span><div class="tr"><i style="width:${max ? Math.min(100, (val / max) * 100) : 0}%"></i></div><b>${text}</b></div>`;
+function renderAnalytics() {
+  const S = [...data.sessions].reverse(), lab = (s) => new Intl.DateTimeFormat("he-IL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jerusalem" }).format(s.start);
+  const mx = (f) => Math.max(1, ...S.map(f));
+  $("chViewers").innerHTML = S.map((s) => bar(lab(s) + " נרשמו", s.registered, mx((x) => x.registered), s.registered) + bar(lab(s) + " נכחו", s.attended, mx((x) => x.registered), s.attended)).join("") || '<div class="empty">אין נתונים</div>';
+  $("chAtt").innerHTML = S.map((s) => bar(lab(s), s.attendance_pct, 100, s.attendance_pct + "%")).join("") || '<div class="empty">אין נתונים</div>';
+  $("chConv").innerHTML = S.map((s) => { const c = s.attended ? Math.round((s.submitted / s.attended) * 100) : 0; return bar(lab(s), c, 100, c + "%"); }).join("") || '<div class="empty">אין נתונים</div>';
+  $("chWatch").innerHTML = S.map((s) => bar(lab(s), s.avg_watch_min, mx((x) => x.avg_watch_min), s.avg_watch_min)).join("") || '<div class="empty">אין נתונים</div>';
+}
+function renderContacts() {
+  const all = people(), t = data.totals;
+  const uniq = new Set(all.map((p) => (p.email || p.phone || "").toLowerCase())).size;
+  const arrived = all.filter((p) => p.attended).length, conv = all.filter((p) => p.submitted).length;
+  $("ckpis").innerHTML = kpi("הרשמות", all.length, "") + kpi("אנשי קשר ייחודיים", uniq, "") + kpi("הגיעו", arrived, `${all.length ? Math.round((arrived / all.length) * 100) : 0}% הגעה`, all.length ? (arrived / all.length) * 100 : 0) + kpi("לא הגיעו", all.length - arrived, "") + kpi("המרות (מילאו שאלון)", conv, `${all.length ? Math.round((conv / all.length) * 100) : 0}% מההרשמות`);
+  const fs = $("fSession"); if (fs.options.length - 1 !== data.sessions.length) fs.innerHTML = '<option value="">כל הסשנים</option>' + data.sessions.map((s) => `<option value="${s.start}">${fmtDate(s.start)}</option>`).join("");
+  const q = $("q").value.trim().toLowerCase(), sess = $("fSession").value, att = $("fAtt").value, fq = $("fQ").value, sort = $("fSort").value;
+  let rows = all.filter((p) =>
+    (!q || [p.name, p.email, p.phone, p.source].some((x) => String(x || "").toLowerCase().includes(q))) &&
+    (!sess || String(p.start) === sess) && (!att || (att === "y") === p.attended) &&
+    (!fq || (fq === "done" ? p.submitted : fq === "open" ? p.opened && !p.submitted : !p.opened)));
+  rows.sort((a, b) => sort === "watch" ? b.watch_min - a.watch_min : sort === "old" ? String(a.registered_at).localeCompare(String(b.registered_at)) : String(b.registered_at).localeCompare(String(a.registered_at)));
+  $("ccount").textContent = `${rows.length} אנשי קשר`;
+  $("ctable").innerHTML = '<tr><th>שם</th><th>מייל / טלפון</th><th>סשן</th><th>נכחה</th><th>צפייה (דק׳)</th><th>%</th><th>שאלון</th><th>צ\'אט</th><th>מקור</th></tr>' +
+    (rows.map((p) => `<tr><td class="gold">${esc(p.name)}</td><td dir="ltr">${esc(p.email)}<br><span class="no">${esc(p.phone)}</span></td><td>${fmtDate(p.start)}</td>
+      <td class="${p.attended ? "ok" : "no"}">${p.attended ? "הגיעה" : "לא"}</td><td>${p.watch_min}</td><td>${p.pct}%</td>
+      <td class="${p.submitted ? "ok" : p.opened ? "gold" : "no"}">${p.submitted ? "מילאה" : p.opened ? "פתחה" : "לא"}</td><td>${p.chat}</td><td>${esc(p.source) || "-"}</td></tr>`).join("") || '<tr><td colspan="9" class="muted">לא נמצאו אנשי קשר</td></tr>');
+}
+function setTab(t) {
+  tab = t;
+  document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
+  ["overview", "contacts", "analytics"].forEach((x) => ($("t-" + x).hidden = x !== t));
+  if (data) { if (t === "contacts") renderContacts(); if (t === "analytics") renderAnalytics(); }
+}
+document.querySelectorAll("#tabs button").forEach((b) => b.addEventListener("click", () => setTab(b.dataset.tab)));
+["q", "fSession", "fAtt", "fQ", "fSort"].forEach((id) => $(id).addEventListener("input", () => renderContacts()));
+
 async function load() {
   const r = await fetch(`/api/dashboard?secret=${encodeURIComponent(secret)}`, { cache: "no-store" });
   if (r.status === 401) { try { localStorage.removeItem("hostSecret"); } catch {} $("login").hidden = false; $("dash").hidden = true; $("lerr").textContent = "סיסמה שגויה"; return; }
   if (r.status === 503) { $("login").hidden = false; $("lerr").textContent = "המערכת עוד לא מוגדרת (אחסון או סיסמת ניהול)"; return; }
   data = await r.json();
   $("login").hidden = true; $("dash").hidden = false;
-  render();
+  render(); if (tab === "contacts") renderContacts(); if (tab === "analytics") renderAnalytics();
 }
 $("lf").addEventListener("submit", (e) => { e.preventDefault(); secret = $("secret").value; try { localStorage.setItem("hostSecret", secret); } catch {} load(); });
 $("refresh").addEventListener("click", (e) => { e.preventDefault(); load(); });
