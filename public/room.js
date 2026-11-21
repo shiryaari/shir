@@ -57,14 +57,14 @@
     const p = document.createElement("span"); p.textContent = text;
     bd.append(b, p); d.append(av, bd); msgs.append(d); msgs.scrollTop = msgs.scrollHeight;
   };
-  const stageActivity = $("stageActivity");
+  const questionnaireNotices = $("questionnaireNotices");
   function showQuestionnaireNotice(who) {
     const firstName = who.trim().split(/\s+/)[0];
     if (!firstName) return;
     const notice = document.createElement("span");
     notice.textContent = firstName + " מילאה את שאלון ההתאמה";
-    stageActivity.append(notice);
-    if (stageActivity.childElementCount > 3) stageActivity.firstElementChild.remove();
+    questionnaireNotices.append(notice);
+    if (questionnaireNotices.childElementCount > 3) questionnaireNotices.firstElementChild.remove();
     setTimeout(() => notice.remove(), 6000);
   }
 
@@ -329,6 +329,7 @@
 
     if (e >= C.durationSeconds && !ended) {
       ended = true;
+      questionnaireNotices.replaceChildren();
       if (!entered) { $("coverText").textContent = "הסשן הזה הסתיים"; $("count").hidden = true; }
       else stage.innerHTML = `<div class="cover"><div style="font-size:1.6rem">${C.endedMessage}</div></div>`;
       addMsg(C.hostName, C.endedMessage, "host");
