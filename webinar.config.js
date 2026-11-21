@@ -13,6 +13,13 @@ module.exports = {
   youtubeId: "i9gmOG0iJ7Q",
   durationSeconds: 67 * 60 + 10, // אורך ההקלטה בשניות (67 דקות ו-10 שניות)
 
+  // פעילות מדומה בחדר, לפי הזמן מתחילת הסשן.
+  roomActivity: {
+    viewerCounts: [236, 242, 249, 257, 264, 269, 266, 273, 268, 261, 252, 245, 239, 232],
+    viewerIntervalSeconds: 300,
+    questionnaireNoticeSeconds: 12,
+  },
+
   // מועדי הסשנים
   slots: {
     // סשנים שבועיים קבועים (שעון ישראל, 0 = ראשון), כמו בדף הנחיתה. להסיר את השורה כדי לעבוד לפי everyMinutes.
@@ -70,10 +77,12 @@ module.exports = {
     embed: true,      // true = נפתח בחלון בתוך החדר, false = נפתח בלשונית חדשה
     ctas: [
       { at: 30 * 60 + 20, durationSeconds: 300, // 30:20 ל-5 דקות
+        activityNoticeOffsets: [20],
         title: "לשאלון התאמה לפגישת פיצוח",
         description: "נמפה את העסק שלך ונבין ביחד מה השלב הבא בדרך ליציבות ויעדים שאת חולמת עליהם",
         buttonText: "לשאלון התאמה" },
       { at: 48 * 60 + 15, durationSeconds: 300, // 48:15 ל-5 דקות
+        activityNoticeOffsets: [20, 90, 180],
         title: "לשאלון התאמה לפגישת פיצוח",
         description: "נמפה את העסק שלך ונבין ביחד מה השלב הבא בדרך ליציבות ויעדים שאת חולמת עליהם",
         buttonText: "לשאלון התאמה" },

@@ -10,7 +10,7 @@
 <body>
 <div class="room" id="room" hidden>
   <div>
-    <div class="room-title"><span class="live">שידור חי</span><b id="title"></b></div>
+    <div class="room-title"><span class="live">שידור חי</span><b id="title"></b><span class="room-viewers badge" id="roomViewers" hidden></span></div>
     <div class="stage" id="stage">
       <div class="cover" id="cover">
         <div id="coverText">הוובינר מתחיל בעוד</div>
@@ -22,6 +22,7 @@
       <div id="ctaTitle"></div>
       <div id="ctaDesc" class="muted" style="margin:4px 0 12px"></div>
       <button id="ctaBtn"></button>
+      <div class="cta-activity" role="status"><span id="ctaActivity" hidden></span></div>
     </div>
   </div>
   <div class="chat" id="chat">

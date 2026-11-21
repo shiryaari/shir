@@ -112,8 +112,7 @@
     .replaceAll("{phone}", encodeURIComponent(S.phone || ""))
     .replaceAll("{id}", encodeURIComponent(S.id));
   let qDone = false, activeCta = -1;
-  const syncCta = () => {
-    const e = elapsed();
+  const syncCta = (e) => {
     const i = qDone ? -1 : C.questionnaire.ctas.findIndex((c) => e >= c.at && e < c.at + c.durationSeconds);
     if (i === activeCta) return;
     activeCta = i;
@@ -133,6 +132,35 @@
   addEventListener("message", (ev) => {
     if (ev.data && ev.data.type === "questionnaire:done") markDone(false);
   });
+
+  const viewerBadge = $("roomViewers");
+  const activityNotice = $("ctaActivity");
+  function syncRoomActivity(e) {
+    const activity = C.roomActivity;
+    if (!activity) return;
+    const inSession = e >= 0 && e < C.durationSeconds;
+    viewerBadge.hidden = !inSession;
+    if (inSession) {
+      const index = Math.min(Math.floor(e / activity.viewerIntervalSeconds), activity.viewerCounts.length - 1);
+      const label = activity.viewerCounts[index] + " צופות עכשיו";
+      if (viewerBadge.textContent !== label) viewerBadge.textContent = label;
+    }
+
+    const cta = C.questionnaire.ctas[activeCta];
+    const noticeIndex = inSession && cta && cta.activityNoticeOffsets
+      ? cta.activityNoticeOffsets.findIndex((offset) => {
+          const noticeAt = cta.at + offset;
+          return e >= noticeAt && e < noticeAt + activity.questionnaireNoticeSeconds;
+        })
+      : -1;
+    if (noticeIndex >= 0) {
+      const label = noticeIndex === 0
+        ? "מישהי מילאה עכשיו את שאלון ההתאמה"
+        : "עוד מישהי מילאה עכשיו את שאלון ההתאמה";
+      if (activityNotice.textContent !== label) activityNotice.textContent = label;
+    }
+    activityNotice.hidden = noticeIndex < 0;
+  }
 
   // ---------- נגן ----------
   let player = null, ytPlayer = null, entered = false, watched = 0, lastTick = 0;
@@ -242,7 +270,8 @@
       else if (e < C.durationSeconds) { enterRoom(); }
     }
     if (e >= 0) tickChat();
-    syncCta();
+    syncCta(e);
+    syncRoomActivity(e);
 
     if (entered && !document.hidden) {
       watched += (Date.now() - lastTick) / 1000;

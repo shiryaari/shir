@@ -23,6 +23,10 @@ button:disabled{opacity:.5;cursor:default}
 @media(min-width:900px){.room{grid-template-columns:1fr 360px;padding:22px}}
 .room-title{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:10px}
 .room-title b{font-family:var(--serif);font-size:1.05rem;font-weight:700;color:var(--text)}
+.room-viewers{margin-inline-start:auto;font-variant-numeric:tabular-nums}
+.room-viewers[hidden]{display:none}
+.cta-activity{font-size:.85rem;color:var(--gold-hi)}
+.cta-activity span:not([hidden]){display:block;margin-top:10px}
 .live{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:800;color:var(--gold-hi);letter-spacing:.04em}
 .live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 rgba(212,175,90,.6);animation:ping 1.8s infinite}
 @keyframes ping{70%{box-shadow:0 0 0 8px rgba(212,175,90,0)}100%{box-shadow:0 0 0 0 rgba(212,175,90,0)}}

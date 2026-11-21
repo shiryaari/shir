@@ -30,6 +30,7 @@ module.exports = async (req, res) => {
       liveChat: cfg.liveChat,
       replies: cfg.replies,
       questionnaire: cfg.questionnaire,
+      roomActivity: cfg.roomActivity,
       progressMilestones: cfg.progressMilestones,
       endedMessage: cfg.endedMessage,
     },
