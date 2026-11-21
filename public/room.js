@@ -48,6 +48,17 @@
     const p = document.createElement("span"); p.textContent = text;
     bd.append(b, p); d.append(av, bd); msgs.append(d); msgs.scrollTop = msgs.scrollHeight;
   };
+  const stageActivity = $("stageActivity");
+  function showQuestionnaireNotice(who) {
+    const firstName = who.trim().split(/\s+/)[0];
+    if (!firstName) return;
+    const notice = document.createElement("span");
+    notice.textContent = firstName + " מילאה את שאלון ההתאמה";
+    stageActivity.append(notice);
+    if (stageActivity.childElementCount > 3) stageActivity.firstElementChild.remove();
+    setTimeout(() => notice.remove(), 6000);
+  }
+
   // צ'אט משידור קודם: נטען מקובץ, ומסומן בכותרת
   let replayChat = [];
   let vimeoPosition = null;
@@ -72,7 +83,13 @@
         const who = isHost ? C.hostName : m.from;
         const message = fill(m.text);
         addMsg(who, message, isHost ? "host" : "");
-        if (m.replay && position - m.at < 2 && e < C.durationSeconds) showStageMessage(who, message);
+        if (m.replay && position - m.at < 2 && e < C.durationSeconds) {
+          if (!isHost && /(?:מילאתי|מיאלתי|מילעתי|נרשמתי|שלחתי את (?:השאלון|הטופס))/.test(message)) {
+            showQuestionnaireNotice(who);
+          } else {
+            showStageMessage(who, message);
+          }
+        }
       }
     });
   };
@@ -160,8 +177,6 @@
 
   const viewerBadge = $("roomViewers");
   const liveBadge = $("liveBadge");
-  const activityNotice = $("ctaActivity");
-  const stageActivity = $("stageActivity");
   function syncRoomActivity(e) {
     const inSession = e >= 0 && e < C.durationSeconds;
     liveBadge.hidden = !inSession;
@@ -175,29 +190,6 @@
       if (viewerBadge.textContent !== label) viewerBadge.textContent = label;
     }
 
-    const cta = C.questionnaire.ctas[activeCta];
-    const noticeIndex = inSession && cta && cta.activityNoticeOffsets
-      ? cta.activityNoticeOffsets.findIndex((offset) => {
-          const noticeAt = cta.at + offset;
-          return e >= noticeAt && e < noticeAt + activity.questionnaireNoticeSeconds;
-        })
-      : -1;
-    activityNotice.hidden = noticeIndex < 0 || !cta.overlay;
-    if (!activityNotice.hidden) {
-      const label = noticeIndex === 0
-        ? "מישהי מילאה עכשיו את שאלון ההתאמה"
-        : "עוד מישהי מילאה עכשיו את שאלון ההתאמה";
-      if (activityNotice.textContent !== label) activityNotice.textContent = label;
-    }
-    // The early popup contains its notice. Later notices stay visible with the video.
-    if (stageActivity.isConnected) {
-      stageActivity.hidden = noticeIndex < 0 || Boolean(cta.overlay);
-      if (!stageActivity.hidden) {
-        const name = cta.activityNoticeNames?.[noticeIndex];
-        const label = name ? name + " מילאה את שאלון ההתאמה" : "עוד מישהי מילאה את שאלון ההתאמה";
-        if (stageActivity.textContent !== label) stageActivity.textContent = label;
-      }
-    }
   }
 
   // ---------- נגן ----------
