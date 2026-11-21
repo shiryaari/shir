@@ -161,6 +161,7 @@
   const viewerBadge = $("roomViewers");
   const liveBadge = $("liveBadge");
   const activityNotice = $("ctaActivity");
+  const stageActivity = $("stageActivity");
   function syncRoomActivity(e) {
     const inSession = e >= 0 && e < C.durationSeconds;
     liveBadge.hidden = !inSession;
@@ -181,13 +182,22 @@
           return e >= noticeAt && e < noticeAt + activity.questionnaireNoticeSeconds;
         })
       : -1;
-    if (noticeIndex >= 0) {
+    activityNotice.hidden = noticeIndex < 0 || !cta.overlay;
+    if (!activityNotice.hidden) {
       const label = noticeIndex === 0
         ? "מישהי מילאה עכשיו את שאלון ההתאמה"
         : "עוד מישהי מילאה עכשיו את שאלון ההתאמה";
       if (activityNotice.textContent !== label) activityNotice.textContent = label;
     }
-    activityNotice.hidden = noticeIndex < 0;
+    // The early popup contains its notice. Later notices stay visible with the video.
+    if (stageActivity.isConnected) {
+      stageActivity.hidden = noticeIndex < 0 || Boolean(cta.overlay);
+      if (!stageActivity.hidden) {
+        const name = cta.activityNoticeNames?.[noticeIndex];
+        const label = name ? name + " מילאה את שאלון ההתאמה" : "עוד מישהי מילאה את שאלון ההתאמה";
+        if (stageActivity.textContent !== label) stageActivity.textContent = label;
+      }
+    }
   }
 
   // ---------- נגן ----------
