@@ -8,14 +8,23 @@
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<div class="room" id="room" hidden>
-  <div>
-    <div class="room-title"><span class="live">שידור חי</span><b id="title"></b><span class="room-viewers badge" id="roomViewers" hidden></span></div>
+<div class="room webinar-room" id="room" hidden>
+  <header class="room-title">
+    <b id="title"></b>
+    <div class="room-status"><span class="live" id="liveBadge" hidden>שידור חי</span><span class="room-viewers" id="roomViewers" hidden></span></div>
+  </header>
+  <main class="room-main">
     <div class="stage" id="stage">
-      <div class="cover" id="cover">
-        <div id="coverText">הוובינר מתחיל בעוד</div>
-        <div class="count" id="count">--:--</div>
-        <button id="enter" hidden>כניסה לוובינר ▶</button>
+      <div class="stage-message" id="stageMessage" aria-hidden="true" hidden>
+        <b id="stageMessageName"></b>
+        <span id="stageMessageText"></span>
+      </div>
+      <div class="cover room-lobby" id="cover">
+        <div class="room-lobby-content">
+          <p class="room-lobby-host">שיר יערי</p>
+          <div id="coverText">הוובינר מתחיל בעוד</div>
+          <div class="count" id="count">--:--</div>
+        </div>
       </div>
     </div>
     <div class="cta" id="cta">
@@ -24,12 +33,12 @@
       <button id="ctaBtn"></button>
       <div class="cta-activity" role="status"><span id="ctaActivity" hidden></span></div>
     </div>
-  </div>
-  <div class="chat" id="chat">
+  </main>
+  <aside class="chat" id="chat" aria-label="צ׳אט השידור">
     <div class="chat-head">צ'אט <span id="replayLabel" class="small"></span></div>
     <div class="msgs" id="msgs"></div>
     <form id="form"><input id="text" placeholder="כתבי הודעה..." autocomplete="off"><button>שליחה</button></form>
-  </div>
+  </aside>
 </div>
 <div class="wrap" id="bad" hidden><div class="card"><h1>הקישור לא תקין</h1><p class="muted">נסי להיכנס מהקישור שקיבלת במייל או בוואטסאפ.</p></div></div>
 <div class="modal" id="modal"><div class="modal-box"><header><b>שאלון</b><button id="close" aria-label="סגירה">×</button></header><iframe id="qframe" title="שאלון"></iframe></div></div>

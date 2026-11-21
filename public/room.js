@@ -29,6 +29,15 @@
 
   // ---------- צ'אט ----------
   const msgs = $("msgs");
+  const stageMessage = $("stageMessage");
+  let stageMessageUntil = 0;
+  function showStageMessage(who, text) {
+    if (now() < stageMessageUntil) return;
+    $("stageMessageName").textContent = who;
+    $("stageMessageText").textContent = text;
+    stageMessage.hidden = false;
+    stageMessageUntil = now() + 4800;
+  }
   const addMsg = (who, text, cls = "") => {
     const d = document.createElement("div");
     d.className = "msg " + cls;
@@ -59,7 +68,10 @@
       if (position !== null && m.at <= position && !shown.has(i)) {
         shown.add(i);
         const isHost = m.from === "host" || m.from === C.hostName;
-        addMsg(isHost ? C.hostName : m.from, fill(m.text), isHost ? "host" : "");
+        const who = isHost ? C.hostName : m.from;
+        const message = fill(m.text);
+        addMsg(who, message, isHost ? "host" : "");
+        if (m.replay && position - m.at < 2 && e < C.durationSeconds) showStageMessage(who, message);
       }
     });
   };
@@ -79,7 +91,11 @@
         liveSeen.add(m.id);
         if (m.role === "host") addMsg(m.from, m.text, "host");
         else if (m.mine) addMsg(S.firstName, m.text, "me");
-        else addMsg(m.from, m.text, "");
+        else {
+          addMsg(m.from, m.text);
+          const position = elapsed();
+          if (position >= 0 && position < C.durationSeconds && now() - m.at < 5000) showStageMessage(m.from, m.text);
+        }
       }
     } catch {}
   }
@@ -137,11 +153,14 @@
   });
 
   const viewerBadge = $("roomViewers");
+  const liveBadge = $("liveBadge");
   const activityNotice = $("ctaActivity");
   function syncRoomActivity(e) {
+    const inSession = e >= 0 && e < C.durationSeconds;
+    liveBadge.hidden = !inSession;
+    if (!inSession || now() >= stageMessageUntil) stageMessage.hidden = true;
     const activity = C.roomActivity;
     if (!activity) return;
-    const inSession = e >= 0 && e < C.durationSeconds;
     viewerBadge.hidden = !inSession;
     if (inSession) {
       const snapshot = activity.viewerCounts.findLast(({ at }) => at <= e);
@@ -291,7 +310,7 @@
 
     if (e >= C.durationSeconds && !ended) {
       ended = true;
-      if (!entered) { $("coverText").textContent = "הסשן הזה הסתיים"; $("count").hidden = true; $("enter").hidden = true; }
+      if (!entered) { $("coverText").textContent = "הסשן הזה הסתיים"; $("count").hidden = true; }
       else stage.innerHTML = `<div class="cover"><div style="font-size:1.6rem">${C.endedMessage}</div></div>`;
       addMsg(C.hostName, C.endedMessage, "host");
     }
