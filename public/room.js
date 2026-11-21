@@ -141,8 +141,8 @@
     const inSession = e >= 0 && e < C.durationSeconds;
     viewerBadge.hidden = !inSession;
     if (inSession) {
-      const index = Math.min(Math.floor(e / activity.viewerIntervalSeconds), activity.viewerCounts.length - 1);
-      const label = activity.viewerCounts[index] + " צופות עכשיו";
+      const snapshot = activity.viewerCounts.findLast(({ at }) => at <= e);
+      const label = snapshot.count + " צופות עכשיו";
       if (viewerBadge.textContent !== label) viewerBadge.textContent = label;
     }
 

@@ -15,8 +15,33 @@ module.exports = {
 
   // פעילות מדומה בחדר, לפי הזמן מתחילת הסשן.
   roomActivity: {
-    viewerCounts: [236, 242, 249, 257, 264, 269, 266, 273, 268, 261, 252, 245, 239, 232],
-    viewerIntervalSeconds: 300,
+    // at = שניות מתחילת הסשן, בסדר עולה.
+    viewerCounts: [
+      { at: 0, count: 236 },
+      { at: 4, count: 241 },
+      { at: 9, count: 247 },
+      { at: 16, count: 254 },
+      { at: 24, count: 259 },
+      { at: 35, count: 265 },
+      { at: 49, count: 270 },
+      { at: 65, count: 274 },
+      { at: 91, count: 271 },
+      { at: 124, count: 276 },
+      { at: 210, count: 272 },
+      { at: 300, count: 275 },
+      { at: 600, count: 271 },
+      { at: 900, count: 266 },
+      { at: 1200, count: 264 },
+      { at: 1500, count: 269 },
+      { at: 1800, count: 266 },
+      { at: 2100, count: 273 },
+      { at: 2400, count: 268 },
+      { at: 2700, count: 261 },
+      { at: 3000, count: 252 },
+      { at: 3300, count: 245 },
+      { at: 3600, count: 239 },
+      { at: 3900, count: 232 },
+    ],
     questionnaireNoticeSeconds: 12,
   },
 
