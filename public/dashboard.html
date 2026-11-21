@@ -50,6 +50,15 @@ th{color:var(--gold-hi);font-weight:700;position:sticky;top:0;background:#0d0d10
 .row .tr{height:18px;background:#1b1b20;border-radius:6px;overflow:hidden}
 .row .tr i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi))}
 .row b{color:var(--gold-hi);text-align:left;direction:ltr}
+tr.cr{cursor:pointer}tr.cr:hover td{background:rgba(212,175,90,.06)}
+tr.det td{background:#0d0d10;padding:14px;white-space:normal}
+.dg{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:760px){.dg{grid-template-columns:1fr 1fr}}
+.db{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#0a0a0c}
+.db h4{margin:0 0 6px;color:var(--gold-hi);font-family:var(--serif);font-size:.95rem}
+.db p{margin:3px 0;font-size:.85rem;color:var(--text)}
+.db .cm{border-top:1px dashed rgba(212,175,90,.18);padding:4px 0;font-size:.85rem}
+.db .cm i{font-style:normal;color:var(--gold);margin-inline-end:6px}
 </style>
 </head>
 <body>
@@ -101,6 +110,30 @@ let secret = "", data = null;
 try { secret = localStorage.getItem("hostSecret") || ""; } catch {}
 const fmtDate = (ms) => new Intl.DateTimeFormat("he-IL", { weekday: "long", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jerusalem" }).format(ms);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmtTs = (ms) => ms ? new Intl.DateTimeFormat("he-IL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Asia/Jerusalem" }).format(ms) : "";
+const fmtIso = (iso) => iso ? fmtTs(new Date(iso).getTime()) : "";
+function detail(p) {
+  const u = p.utm || {}, src = [u.source, u.medium, u.campaign, u.content, u.term, u.ref].filter(Boolean).join(" · ") || "לא ידוע";
+  const watch = p.attended
+    ? `<p>נכנסה בדקה <b class="gold">${p.joined_at_min ?? 0}</b>${p.left_at_min != null ? `, יצאה בדקה <b class="gold">${p.left_at_min}</b>` : ""}</p><p>צפתה <b class="gold">${p.watch_min}</b> דקות (${p.pct}% מהוובינר)</p>`
+    : `<p class="no">לא נכנסה לוובינר</p>`;
+  const q = p.opened
+    ? `<p>פתחה את השאלון${p.opened_ts ? ": " + fmtTs(p.opened_ts) : ""}</p>${p.submitted ? `<p class="ok">מילאה ושלחה${p.submitted_ts ? ": " + fmtTs(p.submitted_ts) : ""}</p>` : `<p class="gold">פתחה ולא מילאה</p>`}<p class="small">תשובות השאלון נשמרות ב-Make ובפייפדרייב.</p>`
+    : `<p class="no">לא פתחה את השאלון</p>`;
+  const chat = p.chat_list && p.chat_list.length
+    ? p.chat_list.map((c) => `<div class="cm"><i>דקה ${Math.round(c.at_second / 6) / 10}</i>${esc(c.text)}</div>`).join("")
+    : `<p class="no">לא כתבה בצ'אט</p>`;
+  const rep = p.replay_min > 0
+    ? `<p>צפתה בהקלטה <b class="gold">${p.replay_min}</b> דקות (${p.replay_pct}%)</p><p>${p.replay_views} פעמים${p.replay_ts ? ", לאחרונה: " + fmtTs(p.replay_ts) : ""}</p>`
+    : `<p class="no">לא צפתה בהקלטה</p>`;
+  return `<div class="dg">
+    <div class="db"><h4>הרשמה</h4><p>${fmtIso(p.registered_at)}</p><p>מקור: ${esc(src)}</p></div>
+    <div class="db"><h4>צפייה בוובינר</h4>${watch}</div>
+    <div class="db"><h4>שאלון</h4>${q}</div>
+    <div class="db"><h4>הקלטה</h4>${rep}</div>
+    <div class="db" style="grid-column:1/-1"><h4>צ'אט (${(p.chat_list || []).length} הודעות)</h4>${chat}</div>
+  </div>`;
+}
 const kpi = (label, val, sub, pct) => `<div class="kpi"><small>${label}</small><b>${val}</b>${sub ? `<span>${sub}</span>` : ""}${pct != null ? `<div class="bar"><i style="width:${Math.min(100, pct)}%"></i></div>` : ""}</div>`;
 
 function render() {
@@ -162,9 +195,10 @@ function renderContacts() {
   rows.sort((a, b) => sort === "watch" ? b.watch_min - a.watch_min : sort === "old" ? String(a.registered_at).localeCompare(String(b.registered_at)) : String(b.registered_at).localeCompare(String(a.registered_at)));
   $("ccount").textContent = `${rows.length} אנשי קשר`;
   $("ctable").innerHTML = '<tr><th>שם</th><th>מייל / טלפון</th><th>סשן</th><th>נכחה</th><th>צפייה (דק׳)</th><th>%</th><th>שאלון</th><th>צ\'אט</th><th>מקור</th></tr>' +
-    (rows.map((p) => `<tr><td class="gold">${esc(p.name)}</td><td dir="ltr">${esc(p.email)}<br><span class="no">${esc(p.phone)}</span></td><td>${fmtDate(p.start)}</td>
+    (rows.map((p, i) => `<tr class="cr" data-i="${i}"><td class="gold">${esc(p.name)}</td><td dir="ltr">${esc(p.email)}<br><span class="no">${esc(p.phone)}</span></td><td>${fmtDate(p.start)}</td>
       <td class="${p.attended ? "ok" : "no"}">${p.attended ? "הגיעה" : "לא"}</td><td>${p.watch_min}</td><td>${p.pct}%</td>
-      <td class="${p.submitted ? "ok" : p.opened ? "gold" : "no"}">${p.submitted ? "מילאה" : p.opened ? "פתחה" : "לא"}</td><td>${p.chat}</td><td>${esc(p.source) || "-"}</td></tr>`).join("") || '<tr><td colspan="9" class="muted">לא נמצאו אנשי קשר</td></tr>');
+      <td class="${p.submitted ? "ok" : p.opened ? "gold" : "no"}">${p.submitted ? "מילאה" : p.opened ? "פתחה" : "לא"}</td><td>${p.chat}</td><td>${esc(p.source) || "-"}</td></tr><tr class="det" hidden><td colspan="9">${detail(p)}</td></tr>`).join("") || '<tr><td colspan="9" class="muted">לא נמצאו אנשי קשר</td></tr>');
+  document.querySelectorAll("#ctable tr.cr").forEach((tr) => tr.addEventListener("click", () => { const d = tr.nextElementSibling; d.hidden = !d.hidden; }));
 }
 function setTab(t) {
   tab = t;

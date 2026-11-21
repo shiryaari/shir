@@ -47,6 +47,8 @@ const base = "http://localhost:3120";
     assert((await page.textContent("#sessions")).includes("דנה כהן"));
     await page.click('#tabs button[data-tab="contacts"]');
     await page.waitForFunction(() => document.getElementById("ctable").textContent.includes("dana@example.com"), null, { timeout: 5000 });
+    await page.click('#ctable tr.cr:has-text("dana@example.com")');
+    await page.waitForFunction(() => { const t = document.getElementById("ctable").textContent; return t.includes("היי") && t.includes("מילאה ושלחה") && t.includes("לא צפתה בהקלטה"); }, null, { timeout: 5000 });
     await page.fill("#q", "michal");
     await page.waitForFunction(() => !document.getElementById("ctable").textContent.includes("dana@example.com") && document.getElementById("ctable").textContent.includes("michal@example.com"), null, { timeout: 5000 });
     assert.match(await page.textContent("#ccount"), /^1 /);
