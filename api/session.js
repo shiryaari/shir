@@ -7,7 +7,8 @@ module.exports = async (req, res) => {
   if (cors(req, res)) return;
   const { t, preview } = req.query || {};
   const previewAt = preview === "questionnaire" ? 30 * 60 + 50
-    : preview === "testimonials" ? 56 * 60 + 15 : null;
+    : preview === "pitch" ? 48 * 60 + 40
+      : preview === "testimonials" ? 56 * 60 + 15 : null;
   const now = Date.now();
   const s = previewAt === null
     ? verify(t)
